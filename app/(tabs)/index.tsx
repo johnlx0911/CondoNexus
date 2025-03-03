@@ -1,74 +1,325 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
+import { LinearGradient } from "expo-linear-gradient";
+import { Checkbox } from "react-native-paper";
+import Icon from "react-native-vector-icons/Feather";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// Import other pages
+// User
+import SignUpPage from "../../screens/User/SignUpPage";
+import HomePage from "../../screens/User/HomePage";
+import ProfilePage from "../../screens/User/ProfilePage";
+import AccessPage from "../../screens/User/AccessPage";
+import MemberPage from "../../screens/User/MemberPage";
+import EditMemberPage from "../../screens/User/EditMemberPage";
+import PaymentPage from "../../screens/User/PaymentPage";
+import TransactionPage from "../../screens/User/TransactionPage";
+import TransactionDetailsPage from "../../screens/User/TransactionDetailsPage";
+import CheckOutPage from "../../screens/User/CheckOutPage";
+import FacilityPage from "../../screens/User/FacilityPage";
+import BookingPage from "../../screens/User/BookingPage";
+import NotificationPage from "../../screens/User/NotificationPage";
+import MessagePage from "../../screens/User/MessagePage";
+import ContactPage from "../../screens/User/ContactPage";
+// User
 
-export default function HomeScreen() {
+// Admin
+import DashboardPage from "../../screens/Admin/DashboardPage";
+import FacilityManagementPage from "../../screens/Admin/FacilityManagementPage";
+import FacilityStatusPage from "../../screens/Admin/FacilityStatusPage";
+import MaintenancePage from "../../screens/Admin/MaintenancePage";
+import ResidentPage from "../../screens/Admin/ResidentPage";
+import ResidentMessagePage from "../../screens/Admin/ResidentMessagePage";
+import AnnouncementPage from "../../screens/Admin/AnnouncementPage";
+// Admin
+
+// Define navigation types
+export type RootStackParamList = {
+  // User
+  Login: undefined;
+  Signup: undefined;
+  Home: undefined;
+  Profile: undefined;
+  Access: undefined;
+  Member: undefined;
+  EditMember: undefined;
+  Payment: undefined;
+  Transaction: undefined;
+  TransactionDetails: { transaction: { month: string; amount: number; date: string } };
+  CheckOut: undefined;
+  Facility: undefined;
+  Booking: { facility: string };
+  Notification: undefined;
+  Message: { message: { sender: string; title: string; body: string; time: string } };
+  Contact: undefined;
+  // User
+
+  // Admin
+  Dashboard: undefined;
+  FacilityManagement: undefined;
+  FacilityStatus: undefined;
+  Maintenance: undefined;
+  ResidentMessage: undefined;
+  Resident: { residentId: string };
+  Announcement: undefined;
+  // Admin
+};
+
+// Create stack navigator
+const Stack = createStackNavigator<RootStackParamList>();
+
+// Login Screen
+import { KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
+
+function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStackParamList, "Login"> }) {
+  const [checked, setChecked] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
+
+            {/* Logo */}
+            <View style={styles.logoContainer}>
+              <Image source={require("../../assets/Logo.png")} style={styles.logo} />
+            </View>
+
+            {/* Input Fields */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Username, Email or Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your username, email, or phone"
+                placeholderTextColor="#ffffff99"
+                value={username}
+                onChangeText={setUsername}
+              />
+
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#ffffff99"
+                  secureTextEntry={!passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={styles.eyeIcon}>
+                  <Icon name={passwordVisible ? "eye-off" : "eye"} size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Remember Me & Forgot Password */}
+            <View style={styles.row}>
+              <TouchableOpacity onPress={() => setChecked(!checked)} activeOpacity={0.8}>
+                <Checkbox.Android
+                  status={checked ? "checked" : "unchecked"}
+                  onPress={() => setChecked(!checked)}
+                  color="#d4af37" // Tick color when checked
+                  uncheckedColor="#fff" // Border color when unchecked
+                />
+              </TouchableOpacity>
+              <Text style={styles.rememberText}>Remember Me</Text>
+              <View style={styles.forgotPasswordContainer}>
+                <TouchableOpacity>
+                  <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Login Button */}
+            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Home")}>
+              <LinearGradient colors={["#fff", "#d4af37"]} style={styles.loginGradient}>
+                <Text style={styles.loginText}>L O G  I N</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            {/* Sign Up */}
+            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+              <Text style={styles.signupText}>
+                Don't have an account? <Text style={styles.signupBold}>Sign up</Text>
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
+// App Navigator
+export default function AppNavigator() {
+  return (
+    <Stack.Navigator initialRouteName="Login">
+      {/* User */}
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Signup" component={SignUpPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+      <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }} />
+      <Stack.Screen name="Access" component={AccessPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Member" component={MemberPage} options={{ headerShown: false }} />
+      <Stack.Screen name="EditMember" component={EditMemberPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Payment" component={PaymentPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Transaction" component={TransactionPage} options={{ headerShown: false }} />
+      <Stack.Screen name="TransactionDetails" component={TransactionDetailsPage} options={{ headerShown: false }} />
+      <Stack.Screen name="CheckOut" component={CheckOutPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Facility" component={FacilityPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Booking" component={BookingPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Notification" component={NotificationPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Message" component={MessagePage} options={{ headerShown: false }} />
+      <Stack.Screen name="Contact" component={ContactPage} options={{ headerShown: false }} />
+      {/* User */}
+
+      {/* Admin */}
+      <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
+      <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
+      <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
+      <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
+      <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
+      {/* Admin */}
+    </Stack.Navigator>
+  );
+}
+
+// Styles
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    justifyContent: "flex-start",
+    paddingHorizontal: 30,
+    paddingTop: 60,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  checkboxWrapper: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: "#fff", // White border so it's visible
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 4,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  checkboxChecked: {
+    backgroundColor: "#d4af37", // Background turns gold when checked
+    borderColor: "#d4af37", // Change border color to match
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 360,
+    height: 360,
+    resizeMode: "contain",
+  },
+  title: {
+    fontSize: 26,
+    color: "#d4af37",
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  inputContainer: {
+    marginBottom: 20,
+    marginTop: -40,
+  },
+  label: {
+    color: "#fff",
+    fontSize: 16,
+    marginBottom: 5,
+    marginTop: 10,
+    fontFamily: "Times New Roman",
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "transparent",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    paddingVertical: 15,
+    fontSize: 18,
+    color: "#fff",
+    fontFamily: "Times New Roman",
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#fff",
+    width: "100%",
+    paddingVertical: 5,
+  },
+  passwordInput: {
+    flex: 1,
+    backgroundColor: "transparent",
+    fontSize: 18,
+    color: "#fff",
+    width: "100%",
+    fontFamily: "Times New Roman",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 5,
+    padding: 5,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  rememberText: {
+    color: "#fff",
+    fontSize: 16,
+    marginLeft: 8,
+    fontFamily: "Times New Roman",
+  },
+  forgotPassword: {
+    color: "#d4af37",
+    fontSize: 16,
+    marginLeft: "auto",
+    fontFamily: "Times New Roman",
+  },
+  forgotPasswordContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  loginButton: {
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  loginGradient: {
+    width: 180,
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: "center",
+  },
+  loginText: {
+    color: "#000",
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Times New Roman",
+  },
+  signupText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
+    fontFamily: "Times New Roman",
+  },
+  signupBold: {
+    fontWeight: "bold",
+    fontStyle: "italic",
+    color: "#d4af37",
+    fontFamily: "Times New Roman",
   },
 });

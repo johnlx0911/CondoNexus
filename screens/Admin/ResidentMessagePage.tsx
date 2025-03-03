@@ -1,0 +1,257 @@
+import React, { useState } from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Animated,
+    FlatList,
+    TextInput,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../App";
+
+// Sample messages data
+const residentMessages = [
+    { id: "1", sender: "John Doe", subject: "Facility Issue", message: "The gym equipment is broken.", status: "Unread" },
+    { id: "2", sender: "Alice", subject: "Billing Question", message: "I need help with my latest invoice.", status: "Read" },
+    { id: "3", sender: "Bob", subject: "Security Concern", message: "Unauthorized entry was detected last night.", status: "Unread" },
+];
+
+const ResidentPage: React.FC = () => {
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const slideAnim = useState(new Animated.Value(-250))[0];
+    const [replyMessage, setReplyMessage] = useState("");
+
+    // Toggle Sidebar
+    const toggleSidebar = () => {
+        Animated.timing(slideAnim, {
+            toValue: sidebarOpen ? -250 : 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+        setSidebarOpen(!sidebarOpen);
+    };
+
+    // Function to reply to a message
+    const replyToMessage = (id: string) => {
+        console.log(`Replying to message ${id}: ${replyMessage}`);
+        setReplyMessage(""); // Clear input after sending
+    };
+
+    // Function to delete a message
+    const deleteMessage = (id: string) => {
+        console.log(`Deleted message ${id}`);
+        // In real-world, this would involve an API call to update the database.
+    };
+
+    // Function to mark message as read/unread
+    const toggleReadStatus = (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === "Unread" ? "Read" : "Unread";
+        console.log(`Message ${id} marked as ${newStatus}`);
+    };
+
+    return (
+        <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
+            {sidebarOpen && <View style={styles.overlay} onTouchStart={toggleSidebar} />}
+
+            {/* Sidebar */}
+            <Animated.View style={[styles.sidebar, { transform: [{ translateX: slideAnim }] }]}>
+                <Text style={styles.sidebarTitle}>Admin Panel</Text>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Dashboard")}>
+                    <Text style={styles.navText}>🏠 Dashboard</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Resident", { residentId: "default" })}>
+                    <Text style={styles.navText}>👥 Residents</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityManagement")}>
+                    <Text style={styles.navText}>🏊 Facility Booking</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityStatus")}>
+                    <Text style={styles.navText}>📊 Facility Status</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Maintenance")}>
+                    <Text style={styles.navText}>🛠 Maintenance</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("ResidentMessage")}>
+                    <Text style={styles.navText}>📩 Messages</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Announcement")}>
+                    <Text style={styles.navText}>📢 Announcements</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.logoutItem}>
+                    <Text style={styles.navText}>🚪 Logout</Text>
+                </TouchableOpacity>
+            </Animated.View>
+
+            {/* Main Content */}
+            <ScrollView style={styles.mainContent}>
+                {/* Toggle Sidebar Button */}
+                <TouchableOpacity onPress={toggleSidebar} style={styles.menuButton}>
+                    <Text style={styles.menuText}>☰</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.heading}>Resident Messages</Text>
+
+                {/* Messages List */}
+                <FlatList
+                    data={residentMessages}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <LinearGradient colors={["#d4af37", "#fff"]} style={styles.card}>
+                            <Text style={styles.cardTitle}>{item.subject}</Text>
+                            <Text style={styles.cardText}>From: {item.sender}</Text>
+                            <Text style={styles.cardText}>{item.message}</Text>
+                            <Text style={[styles.cardText, { color: item.status === "Unread" ? "orange" : "green" }]}>
+                                Status: {item.status}
+                            </Text>
+
+                            {/* Reply Input */}
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Type your reply..."
+                                placeholderTextColor="#444"
+                                value={replyMessage}
+                                onChangeText={setReplyMessage}
+                            />
+
+                            {/* Action Buttons */}
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity style={[styles.button, styles.green]} onPress={() => replyToMessage(item.id)}>
+                                    <Text style={styles.buttonText}>Reply</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.button, styles.blue]}
+                                    onPress={() => toggleReadStatus(item.id, item.status)}
+                                >
+                                    <Text style={styles.buttonText}>{item.status === "Unread" ? "Mark as Read" : "Mark as Unread"}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.button, styles.red]} onPress={() => deleteMessage(item.id)}>
+                                    <Text style={styles.buttonText}>Delete</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </LinearGradient>
+                    )}
+                />
+            </ScrollView>
+        </LinearGradient>
+    );
+};
+
+/* ✅ Styles */
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    sidebar: {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: 250,
+        height: "100%",
+        backgroundColor: "#1a120b",
+        padding: 20,
+        zIndex: 10,
+    },
+    sidebarTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#d4af37",
+        marginBottom: 10,
+    },
+    navItem: {
+        paddingVertical: 10,
+        paddingHorizontal: 5,
+        borderRadius: 5,
+        marginVertical: 5,
+    },
+    navText: {
+        color: "#fff",
+        fontSize: 16,
+    },
+    logoutItem: {
+        marginVertical: 10,
+        backgroundColor: "#ffdddd",
+        borderRadius: 5,
+        padding: 10,
+    },
+    overlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        zIndex: 5,
+    },
+    mainContent: {
+        flex: 1,
+        padding: 20,
+    },
+    menuButton: {
+        padding: 10,
+        position: "absolute",
+        left: 20,
+        top: 20,
+        zIndex: 15,
+    },
+    menuText: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#d4af37",
+    },
+    heading: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#fff",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    card: {
+        marginBottom: 15,
+        padding: 15,
+        borderRadius: 10,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    cardText: {
+        fontSize: 16,
+        color: "#444",
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#999",
+        borderRadius: 5,
+        padding: 8,
+        marginTop: 10,
+        fontSize: 14,
+        color: "#000",
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 10,
+    },
+    button: {
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 5,
+        alignItems: "center",
+    },
+    buttonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    green: { backgroundColor: "green" },
+    blue: { backgroundColor: "blue" },
+    red: { backgroundColor: "red" },
+});
+
+export default ResidentPage;
