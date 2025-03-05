@@ -16,14 +16,18 @@ const AccessPage = () => {
                 <Icon name="arrow-left" size={24} color="#d4af37" />
             </TouchableOpacity>
 
+            {/* Page Title */}
+            <Text style={styles.title}>A C C E S S</Text>
+            <View style={styles.titleLine} />
+
             {/* Access Icon */}
             <View style={styles.accessContainer}>
                 <Image source={require("../../assets/access-icon.png")} style={styles.accessIcon} />
-                <Text style={styles.accessText}>TAP TO ACCESS</Text>
+                <Text style={styles.accessText}>T A P  T O  A C C E S S</Text>
             </View>
 
             {/* Bottom Navigation */}
-            <View style={styles.bottomNav}>
+            <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
                 <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={30} color="#000" />
                     <Text style={styles.navText}>Home</Text>
@@ -38,7 +42,7 @@ const AccessPage = () => {
                     <Icon name="user" size={30} color="#000" />
                     <Text style={styles.navText}>Profile</Text>
                 </TouchableOpacity>
-            </View>
+            </LinearGradient>
         </LinearGradient>
     );
 };
@@ -46,51 +50,76 @@ const AccessPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: "center",
+        paddingTop: 50,
         alignItems: "center",
-        paddingHorizontal: 30,
     },
     backButton: {
         position: "absolute",
         top: 50,
-        left: 20,
+        left: 35,
+        marginTop: 30,
+        zIndex: 10, // ✅ Ensures it's above everything
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#d4af37",
+        textAlign: "center",
+        fontFamily: "Times New Roman",
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    titleLine: {
+        width: "85%", // ✅ Adjust width as needed
+        height: 1, // ✅ Thickness of the line
+        backgroundColor: "#d4af37", // ✅ Golden color like the text
+        alignSelf: "center", // ✅ Centers the line
+        marginTop: 1, // ✅ Spacing from title
+        borderRadius: 2, // ✅ Smooth edges
+        marginBottom: 20,
     },
     accessContainer: {
         alignItems: "center",
         marginBottom: 40,
     },
     accessIcon: {
-        width: 120,
-        height: 120,
+        width: 200,
+        height: 200,
+        marginTop: 120,
+        marginBottom: 30,
         resizeMode: "contain",
     },
     accessText: {
-        fontSize: 16,
+        fontSize: 25,
+        fontFamily: "Times New Roman",
         color: "#d4af37",
         fontWeight: "bold",
         marginTop: 10,
     },
     bottomNav: {
         position: "absolute",
-        bottom: 20,
+        bottom: 30,
         flexDirection: "row",
-        backgroundColor: "#fff",
+        paddingVertical: 15,
+        width: "85%",
+        maxWidth: 350,
         borderRadius: 25,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        width: "90%",
         justifyContent: "space-around",
-        alignItems: "center",
+        alignSelf: "center",
         elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
     },
     navButton: {
         alignItems: "center",
     },
     navText: {
-        fontSize: 12,
-        fontWeight: "bold",
         color: "#000",
-        marginTop: 5,
+        fontSize: 16,
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
     },
 });
 

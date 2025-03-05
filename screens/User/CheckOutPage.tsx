@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     paymentMethodText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "bold",
         color: "#000",
         fontFamily: "Times New Roman",
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     confirmText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "bold",
         color: "#000",
         fontFamily: "Times New Roman",

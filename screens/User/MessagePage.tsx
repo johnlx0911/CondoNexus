@@ -20,14 +20,20 @@ const MessagePage = () => {
             </TouchableOpacity>
 
             {/* Page Title */}
-            <Text style={styles.title}>NOTIFICATION</Text>
+            <Text style={styles.title}>N O T I F I C A T I O N</Text>
+            <View style={styles.titleLine} />
 
             {/* Sender Info */}
             <View style={styles.senderContainer}>
+                {/* Gradient Background for Icon */}
                 <Image source={require("../../assets/profile-icon.png")} style={styles.senderImage} />
-                <View>
-                    <Text style={styles.senderName}>{message.sender}</Text>
-                    <Text style={styles.timestamp}>{message.time}</Text>
+
+                {/* Sender Details */}
+                <View style={styles.senderDetails}>
+                    <View style={styles.senderRow}>
+                        <Text style={styles.senderName}>{message.sender}</Text>
+                        <Text style={styles.timestamp}>{message.time}</Text>
+                    </View>
                     <Text style={styles.recipient}>to me</Text>
                 </View>
             </View>
@@ -35,11 +41,12 @@ const MessagePage = () => {
             {/* Message Content */}
             <View style={styles.messageContainer}>
                 <Text style={styles.messageTitle}>{message.title}</Text>
+                <View style={styles.messageLine} />
                 <Text style={styles.messageBody}>{message.body}</Text>
             </View>
 
             {/* Bottom Navigation */}
-            <View style={styles.bottomNav}>
+            <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
                 <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={30} color="#000" />
                     <Text style={styles.navText}>Home</Text>
@@ -54,7 +61,7 @@ const MessagePage = () => {
                     <Icon name="user" size={30} color="#000" />
                     <Text style={styles.navText}>Profile</Text>
                 </TouchableOpacity>
-            </View>
+            </LinearGradient>
         </LinearGradient>
     );
 };
@@ -62,82 +69,119 @@ const MessagePage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
         paddingTop: 50,
+        alignItems: "center",
     },
     backButton: {
         position: "absolute",
         top: 50,
-        left: 20,
+        left: 35,
+        marginTop: 30,
+        zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#d4af37",
         textAlign: "center",
-        marginBottom: 20,
+        fontFamily: "Times New Roman",
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    titleLine: {
+        width: "85%", // ✅ Adjust width as needed
+        height: 1, // ✅ Thickness of the line
+        backgroundColor: "#d4af37", // ✅ Golden color like the text
+        alignSelf: "center", // ✅ Centers the line
+        marginTop: 1, // ✅ Spacing from title
+        borderRadius: 2, // ✅ Smooth edges
+        marginBottom: 10,
     },
     senderContainer: {
         flexDirection: "row",
         alignItems: "center",
+        width: "85%",
         marginBottom: 20,
+        marginTop: 20,
     },
     senderImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 10,
+        width: 55,
+        height: 55,
+    },
+    senderDetails: {
+        flex: 1,
+        marginLeft: 15,
+    },
+    senderRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 5,
     },
     senderName: {
-        fontSize: 18,
+        fontSize: 30,
         fontWeight: "bold",
         color: "#d4af37",
+        fontFamily: "Times New Roman",
     },
     timestamp: {
-        fontSize: 12,
+        fontSize: 15,
         color: "#fff",
+        fontFamily: "Times New Roman",
     },
     recipient: {
-        fontSize: 12,
+        fontSize: 15,
         color: "#fff",
+        fontFamily: "Times New Roman",
     },
     messageContainer: {
-        backgroundColor: "rgba(255,255,255,0.1)",
-        padding: 15,
-        borderRadius: 10,
+        width: "85%",
+        marginBottom: 20,
     },
     messageTitle: {
-        fontSize: 18,
+        fontSize: 30,
         fontWeight: "bold",
         color: "#fff",
-        marginBottom: 10,
+        fontFamily: "Times New Roman",
+        marginBottom: 5,
+    },
+    messageLine: {
+        width: "100%",
+        height: 1,
+        backgroundColor: "#d4af37",
+        marginBottom: 25,
+        marginTop: 25,
+        borderRadius: 2,
     },
     messageBody: {
-        fontSize: 14,
+        fontSize: 18,
         color: "#fff",
+        fontFamily: "Times New Roman",
     },
     bottomNav: {
         position: "absolute",
-        bottom: 20,
+        bottom: 30,
         flexDirection: "row",
-        backgroundColor: "#fff",
+        paddingVertical: 15,
+        width: "85%",
+        maxWidth: 350,
         borderRadius: 25,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        width: "90%",
         justifyContent: "space-around",
-        alignItems: "center",
         alignSelf: "center",
         elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
     },
     navButton: {
         alignItems: "center",
     },
     navText: {
-        fontSize: 12,
-        fontWeight: "bold",
         color: "#000",
-        marginTop: 5,
+        fontSize: 16,
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
     },
 });
 

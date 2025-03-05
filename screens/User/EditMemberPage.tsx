@@ -17,12 +17,13 @@ const EditMemberPage = () => {
             </TouchableOpacity>
 
             {/* Page Title */}
-            <Text style={styles.title}>MEMBER</Text>
+            <Text style={styles.title}>M E M B E R</Text>
+            <View style={styles.titleLine} />
 
-            {/* Edit Icon */}
-            <View style={styles.iconContainer}>
+            {/* Edit Icon with Gradient Background */}
+            <LinearGradient colors={["#f5e3a1", "#b88b4a"]} style={styles.iconContainer}>
                 <Image source={require("../../assets/edit-icon.png")} style={styles.editIcon} />
-            </View>
+            </LinearGradient>
 
             {/* Input Fields */}
             <View style={styles.inputContainer}>
@@ -33,15 +34,15 @@ const EditMemberPage = () => {
                 <TextInput style={styles.input} placeholderTextColor="#ffffff99" />
             </View>
 
-            {/* Invite Button */}
+            {/* Invite Button with Gradient Background */}
             <TouchableOpacity style={styles.inviteButton}>
-                <LinearGradient colors={["#fff", "#d4af37"]} style={styles.inviteGradient}>
+                <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.inviteGradient}>
                     <Text style={styles.inviteText}>I N V I T E</Text>
                 </LinearGradient>
             </TouchableOpacity>
 
             {/* Bottom Navigation */}
-            <View style={styles.bottomNav}>
+            <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
                 <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={30} color="#000" />
                     <Text style={styles.navText}>Home</Text>
@@ -56,7 +57,7 @@ const EditMemberPage = () => {
                     <Icon name="user" size={30} color="#000" />
                     <Text style={styles.navText}>Profile</Text>
                 </TouchableOpacity>
-            </View>
+            </LinearGradient>
         </LinearGradient>
     );
 };
@@ -64,83 +65,109 @@ const EditMemberPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
         paddingTop: 50,
+        alignItems: "center",
     },
     backButton: {
         position: "absolute",
         top: 50,
-        left: 20,
+        left: 35,
+        marginTop: 30,
+        zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#d4af37",
         textAlign: "center",
+        fontFamily: "Times New Roman",
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    titleLine: {
+        width: "85%", // ✅ Adjust width as needed
+        height: 1, // ✅ Thickness of the line
+        backgroundColor: "#d4af37", // ✅ Golden color like the text
+        alignSelf: "center", // ✅ Centers the line
+        marginTop: 1, // ✅ Spacing from title
+        borderRadius: 2, // ✅ Smooth edges
         marginBottom: 20,
     },
     iconContainer: {
+        width: 140, // ✅ Matches expected size
+        height: 140,
+        borderRadius: 70, // ✅ Fully rounded
         alignItems: "center",
-        marginBottom: 20,
+        justifyContent: "center",
+        marginBottom: 50,
+        marginTop: 50,
     },
     editIcon: {
-        width: 100,
-        height: 100,
+        width: 70, // ✅ Matches expected size
+        height: 70,
         resizeMode: "contain",
     },
     inputContainer: {
+        width: "85%",
         marginBottom: 20,
     },
     label: {
-        color: "#fff",
-        fontSize: 14,
+        fontSize: 16,
+        color: "#A0A0A0", // ✅ Gray color for labels
+        fontFamily: "Times New Roman",
         marginBottom: 5,
     },
     input: {
-        backgroundColor: "transparent",
         borderBottomWidth: 1,
-        borderBottomColor: "#fff",
+        borderBottomColor: "#A0A0A0",
         paddingVertical: 5,
-        fontSize: 16,
+        fontSize: 18,
         color: "#fff",
+        fontFamily: "Times New Roman",
+        marginBottom: 20,
     },
     inviteButton: {
-        marginTop: 30,
+        marginTop: 120, // ✅ Adjusted for spacing
         alignSelf: "center",
+        width: "85%",
     },
     inviteGradient: {
-        width: 180,
-        paddingVertical: 12,
+        width: "100%",
+        paddingVertical: 15,
         borderRadius: 25,
         alignItems: "center",
+        elevation: 5,
     },
     inviteText: {
         color: "#000",
         fontSize: 18,
         fontWeight: "bold",
+        fontFamily: "Times New Roman",
     },
     bottomNav: {
         position: "absolute",
-        bottom: 20,
+        bottom: 30,
         flexDirection: "row",
-        backgroundColor: "#fff",
+        paddingVertical: 15,
+        width: "85%",
+        maxWidth: 350,
         borderRadius: 25,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        width: "90%",
         justifyContent: "space-around",
-        alignItems: "center",
         alignSelf: "center",
         elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
     },
     navButton: {
         alignItems: "center",
     },
     navText: {
-        fontSize: 12,
-        fontWeight: "bold",
         color: "#000",
-        marginTop: 5,
+        fontSize: 16,
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
     },
 });
 

@@ -26,7 +26,8 @@ const MemberPage = () => {
             </TouchableOpacity>
 
             {/* Page Title */}
-            <Text style={styles.title}>MEMBER</Text>
+            <Text style={styles.title}>M E M B E R</Text>
+            <View style={styles.titleLine} />
 
             {/* Member List */}
             <ScrollView style={styles.listContainer}>
@@ -36,17 +37,20 @@ const MemberPage = () => {
                         style={styles.memberCard}
                         onPress={() => navigation.navigate("EditMember")}
                     >
-                        <Image source={require("../../assets/profile-icon.png")} style={styles.memberImage} />
-                        <View>
-                            <Text style={styles.memberName}>{member.name}</Text>
-                            <Text style={styles.memberEmail}>{member.email}</Text>
+                        <View style={styles.memberContent}>
+                            <Image source={require("../../assets/profile-icon.png")} style={styles.memberImage} />
+                            <View>
+                                <Text style={styles.memberName}>{member.name}</Text>
+                                <Text style={styles.memberEmail}>{member.email}</Text>
+                            </View>
                         </View>
+                        <Icon name="chevron-right" size={20} color="#fff" />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
             {/* Bottom Navigation */}
-            <View style={styles.bottomNav}>
+            <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
                 <TouchableOpacity style={styles.navButton} onPress={() => navigation.navigate("Home")}>
                     <Icon name="home" size={30} color="#000" />
                     <Text style={styles.navText}>Home</Text>
@@ -61,7 +65,7 @@ const MemberPage = () => {
                     <Icon name="user" size={30} color="#000" />
                     <Text style={styles.navText}>Profile</Text>
                 </TouchableOpacity>
-            </View>
+            </LinearGradient>
         </LinearGradient>
     );
 };
@@ -69,69 +73,94 @@ const MemberPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
         paddingTop: 50,
+        alignItems: "center",
     },
     backButton: {
         position: "absolute",
         top: 50,
-        left: 20,
+        left: 35,
+        marginTop: 30,
+        zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#d4af37",
         textAlign: "center",
+        fontFamily: "Times New Roman",
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    titleLine: {
+        width: "85%", // ✅ Adjust width as needed
+        height: 1, // ✅ Thickness of the line
+        backgroundColor: "#d4af37", // ✅ Golden color like the text
+        alignSelf: "center", // ✅ Centers the line
+        marginTop: 1, // ✅ Spacing from title
+        borderRadius: 2, // ✅ Smooth edges
         marginBottom: 20,
     },
     listContainer: {
-        marginBottom: 20,
+        flex: 1,
+        width: "86%",
     },
     memberCard: {
         flexDirection: "row",
+        justifyContent: "space-between",
+        paddingVertical: 12,
+        paddingHorizontal: 15,
         alignItems: "center",
-        backgroundColor: "#d4af37",
+        backgroundColor: "rgba(255, 255, 255, 0.1)", // ✅ Matches NotificationPage style
         borderRadius: 15,
-        padding: 15,
-        marginBottom: 10,
+        width: "100%", // ✅ Reduced width to match title line
+        marginBottom: 20,
+    },
+    memberContent: {
+        flexDirection: "row",
+        alignItems: "center",
     },
     memberImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 15,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
     },
     memberName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "bold",
-        color: "#000",
+        color: "#d4af37",
+        fontFamily: "Times New Roman",
     },
     memberEmail: {
-        fontSize: 14,
-        color: "#333",
+        fontSize: 16,
+        color: "#fff",
+        fontFamily: "Times New Roman",
     },
     bottomNav: {
         position: "absolute",
-        bottom: 20,
+        bottom: 30,
         flexDirection: "row",
-        backgroundColor: "#fff",
+        paddingVertical: 15,
+        width: "85%",
+        maxWidth: 350,
         borderRadius: 25,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        width: "90%",
         justifyContent: "space-around",
-        alignItems: "center",
         alignSelf: "center",
         elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
     },
     navButton: {
         alignItems: "center",
     },
     navText: {
-        fontSize: 12,
-        fontWeight: "bold",
         color: "#000",
-        marginTop: 5,
+        fontSize: 16,
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
     },
 });
 
