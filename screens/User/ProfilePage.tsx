@@ -1,13 +1,32 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfilePage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+    // ✅ Handle Logout Function
+    const handleLogout = async () => {
+        Alert.alert(
+            "Confirm Logout",
+            "Are you sure you want to log out?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Logout",
+                    onPress: async () => {
+                        await AsyncStorage.removeItem("userToken"); // ✅ Clear stored token
+                        navigation.replace("Login"); // ✅ Redirect to Login screen
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -50,9 +69,10 @@ const ProfilePage = () => {
                 </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.button}>
+            {/* ✅ LOGOUT BUTTON */}
+            <TouchableOpacity style={styles.button} onPress={handleLogout}>
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.buttonGradient}>
-                    <Text style={styles.buttonText}>L O G  O U T</Text>
+                    <Text style={styles.logoutText}>L O G  O U T</Text>
                 </LinearGradient>
             </TouchableOpacity>
 
@@ -82,6 +102,11 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 50,
         alignItems: "center",
+    },
+    logoutText: {
+        fontSize: 18,
+        fontFamily: "Times New Roman",
+        color: "#000", // Dark red to indicate logout
     },
     backButton: {
         position: "absolute",

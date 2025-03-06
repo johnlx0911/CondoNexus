@@ -48,3 +48,23 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+How to start the app?
+1. Open terminal, cd to the project path, in this case, "cd projects/CondoNexusExpo"
+2. After within the correct path, just type "npm start"
+3. Then terminal will handle, to use in development mode, leave it default, to use Expo using actual phone, press 's' to switch to Expo Go mode
+4. Use actual phone' cam scan the QR, will direct to Expo App, and open your project
+
+MySQL
+1. Root Password : BACS3143CondoNexus
+2. User Credentials:
+    - John, John@2003
+    - Varsya, Varsya@1234
+3. To use MySQL, first login using root password, then type: "use condonexus" (to choose use which db, in this case, is condonexus)
+4. To check the current registered list, type: "SELECT * FROM users;"
+5. To delete specific registered account, type: "DELETE FROM users WHERE email = 'user@example.com';"
+6. To reset the unique number to 1, type: "ALTER TABLE users AUTO_INCREMENT = 1;"
+
+To link the project with database
+1. Open terminal, cd to backend, type: "node server.js"
+2. Then a result will show server running on port ****, then mention also connected to MySQL Database

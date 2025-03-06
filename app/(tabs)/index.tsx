@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from "react-native";
 import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
 import { LinearGradient } from "expo-linear-gradient";
 import { Checkbox } from "react-native-paper";
 import Icon from "react-native-vector-icons/Feather";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Import other pages
 // User
@@ -75,8 +77,71 @@ import { KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, K
 function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStackParamList, "Login"> }) {
   const [checked, setChecked] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // ✅ Auto-login check
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (token) {
+          console.log("🔄 Token found! Redirecting to Home.");
+          navigation.replace("Home");
+        } else {
+          console.log("🔄 No token found, staying on Login Page.");
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+      }
+    };
+    checkLoginStatus();
+  }, []);
+
+  // ✅ Load Remember Me details
+  useEffect(() => {
+    const loadRememberMe = async () => {
+      const savedEmail = await AsyncStorage.getItem("rememberedEmail");
+      if (savedEmail) {
+        setEmail(savedEmail);
+        setChecked(true);
+      }
+    };
+    loadRememberMe();
+  }, []);
+
+  // ✅ Handle Login
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://192.168.0.220:5000/login", { email, password });
+
+      if (response.data.token) {
+        await AsyncStorage.setItem("userToken", response.data.token);
+        if (checked) {
+          await AsyncStorage.setItem("rememberedEmail", email); // ✅ Store email if Remember Me is checked
+        } else {
+          await AsyncStorage.removeItem("rememberedEmail"); // ✅ Remove if unchecked
+        }
+        navigation.replace("Home");
+      } else {
+        Alert.alert("Login Failed", response.data.message);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("Login Error", "Invalid email or password.");
+    }
+  };
+
+  // ✅ Handle Logout (to be called from HomePage)
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userToken");
+    navigation.replace("Login");
+  };
 
   return (
     <KeyboardAvoidingView
@@ -94,13 +159,15 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
 
             {/* Input Fields */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username, Email or Phone Number</Text>
+              <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your username, email, or phone"
+                placeholder="Enter your email"
                 placeholderTextColor="#ffffff99"
-                value={username}
-                onChangeText={setUsername}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
 
               <Text style={styles.label}>Password</Text>
@@ -125,20 +192,18 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
                 <Checkbox.Android
                   status={checked ? "checked" : "unchecked"}
                   onPress={() => setChecked(!checked)}
-                  color="#d4af37" // Tick color when checked
-                  uncheckedColor="#fff" // Border color when unchecked
+                  color="#d4af37"
+                  uncheckedColor="#fff"
                 />
               </TouchableOpacity>
               <Text style={styles.rememberText}>Remember Me</Text>
-              <View style={styles.forgotPasswordContainer}>
-                <TouchableOpacity>
-                  <Text style={styles.forgotPassword}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Login Button */}
-            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Home")}>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <LinearGradient colors={["#fff", "#d4af37"]} style={styles.loginGradient}>
                 <Text style={styles.loginText}>L O G  I N</Text>
               </LinearGradient>
@@ -150,6 +215,7 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
                 Don't have an account? <Text style={styles.signupBold}>Sign up</Text>
               </Text>
             </TouchableOpacity>
+
           </LinearGradient>
         </ScrollView>
       </TouchableWithoutFeedback>
