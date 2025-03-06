@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+    Image, StyleSheet, Text, TextInput, TouchableOpacity, View,
+    KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Alert
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "../../App"; // Import the navigation types
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../App"; // Import navigation types
 
 const SignUpPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -18,6 +21,52 @@ const SignUpPage = () => {
     const [unitNumber, setUnitNumber] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
+    // 📌 Function to handle user signup
+    const handleSignUp = async () => {
+
+        const API_URL = "http://192.168.0.220:5000/signup"; // Replace with your IP
+
+        if (!mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert("Error", "Passwords do not match.");
+            return;
+        }
+
+        try {
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    mobile,
+                    email,
+                    password,
+                    address,
+                    unit_number: unitNumber,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                Alert.alert("Success", "User registered successfully!", [
+                    { text: "OK", onPress: () => navigation.navigate("Login") },
+                ]);
+            } else {
+                Alert.alert("Error", data.message || "Signup failed.");
+            }
+        } catch (error) {
+            Alert.alert("Error", "Something went wrong.");
+            console.error("Signup error:", error);
+        }
+    };
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.gradientContainer}>
@@ -109,7 +158,7 @@ const SignUpPage = () => {
                         </View>
 
                         {/* Sign Up Button */}
-                        <TouchableOpacity style={styles.signUpButton}>
+                        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
                             <LinearGradient colors={["#fff", "#d4af37"]} style={styles.signUpGradient}>
                                 <Text style={styles.signUpText}>R E G I S T E R</Text>
                             </LinearGradient>
@@ -131,53 +180,45 @@ const SignUpPage = () => {
 
 const styles = StyleSheet.create({
     gradientContainer: {
-        flex: 1,
+        flex: 1
     },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: "flex-start",
         paddingHorizontal: 30,
         paddingTop: 60,
-        paddingBottom: 100,
+        paddingBottom: 100
     },
     container: {
-        flex: 1,
+        flex: 1
     },
     logoContainer: {
         alignItems: "center",
-        marginBottom: 20,
+        marginBottom: 20
     },
     logo: {
         width: 360,
         height: 360,
-        resizeMode: "contain",
-    },
-    title: {
-        fontSize: 26,
-        color: "#d4af37",
-        fontWeight: "bold",
-        marginTop: 10,
-        fontFamily: Platform.OS === "ios" ? "Times New Roman" : "TimesNewRoman-Regular",
+        resizeMode: "contain"
     },
     inputContainer: {
         marginTop: -40,
-        marginBottom: 30,
+        marginBottom: 30
     },
     label: {
         color: "#fff",
         fontSize: 16,
+        fontFamily: "Times New Roman",
         marginBottom: 5,
-        marginTop: 10,
-        fontFamily: Platform.OS === "ios" ? "Times New Roman" : "TimesNewRoman-Regular",
+        marginTop: 10
     },
     input: {
-        backgroundColor: "transparent",
         borderBottomWidth: 1,
         borderBottomColor: "#fff",
         paddingVertical: 15,
         fontSize: 18,
-        color: "#fff",
-        fontFamily: Platform.OS === "ios" ? "Times New Roman" : "TimesNewRoman-Regular",
+        fontFamily: "Times New Roman",
+        color: "#fff"
     },
     passwordContainer: {
         flexDirection: "row",
@@ -185,29 +226,28 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#fff",
         width: "100%",
-        paddingVertical: 5,
+        paddingVertical: 5
     },
     passwordInput: {
         flex: 1,
-        backgroundColor: "transparent",
         fontSize: 18,
         color: "#fff",
-        fontFamily: Platform.OS === "ios" ? "Times New Roman" : "TimesNewRoman-Regular",
+        fontFamily: "Times New Roman",
     },
     eyeIcon: {
         position: "absolute",
         right: 5,
-        padding: 5,
+        padding: 5
     },
     signUpButton: {
         marginTop: 20,
-        alignSelf: "center",
+        alignSelf: "center"
     },
     signUpGradient: {
         width: 180,
         paddingVertical: 12,
         borderRadius: 25,
-        alignItems: "center",
+        alignItems: "center"
     },
     signUpText: {
         color: "#000",
@@ -218,15 +258,14 @@ const styles = StyleSheet.create({
     loginText: {
         color: "#fff",
         fontSize: 16,
-        textAlign: "center",
-        marginTop: 20,
         fontFamily: "Times New Roman",
+        textAlign: "center",
+        marginTop: 20
     },
     loginBold: {
         fontWeight: "bold",
         fontStyle: "italic",
-        color: "#d4af37",
-        fontFamily: "Times New Roman",
+        color: "#d4af37"
     },
 });
 
