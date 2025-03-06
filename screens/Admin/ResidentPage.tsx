@@ -61,30 +61,30 @@ const ResidentPage: React.FC = () => {
 
             {/* Sidebar */}
             <Animated.View style={[styles.sidebar, { transform: [{ translateX: slideAnim }] }]}>
-                <Text style={styles.sidebarTitle}>Admin Panel</Text>
+                <Text style={styles.sidebarTitle}>A D M I N  P A N E L</Text>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Dashboard")}>
-                    <Text style={styles.navText}>🏠 Dashboard</Text>
+                    <Text style={styles.navText}>🏠  D A S H B O A R D</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Resident", { residentId: "default" })}>
-                    <Text style={styles.navText}>👥 Residents</Text>
+                    <Text style={styles.navText}>👥  R E S I D E N T S</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityManagement")}>
-                    <Text style={styles.navText}>🏊 Facility Booking</Text>
+                    <Text style={styles.navText}>🏊  F A C I L I T Y  B O O K I N G</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityStatus")}>
-                    <Text style={styles.navText}>📊 Facility Status</Text>
+                    <Text style={styles.navText}>📊  F A C I L I T Y  S T A T U S</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Maintenance")}>
-                    <Text style={styles.navText}>🛠 Maintenance</Text>
+                    <Text style={styles.navText}>🛠  M A I N T E N A N C E</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("ResidentMessage")}>
-                    <Text style={styles.navText}>📩 Messages</Text>
+                    <Text style={styles.navText}>📩  M E S S A G E S</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Announcement")}>
-                    <Text style={styles.navText}>📢 Announcements</Text>
+                    <Text style={styles.navText}>📢  A N N O U N C E M E N T S</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.logoutItem}>
-                    <Text style={styles.navText}>🚪 Logout</Text>
+                    <Text style={styles.navText}>🚪  L O G O U T</Text>
                 </TouchableOpacity>
             </Animated.View>
 
@@ -95,7 +95,11 @@ const ResidentPage: React.FC = () => {
                     <Text style={styles.menuText}>☰</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.heading}>Resident Management</Text>
+                {/* Page Title (Updated) */}
+                <View style={{ alignItems: "center", marginTop: 30 }}>
+                    <Text style={styles.title}>R E S I D E N T S</Text>
+                    <View style={styles.titleLine} />
+                </View>
 
                 {/* Residents List */}
                 <FlatList
@@ -145,6 +149,31 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    backButton: {
+        position: "absolute",
+        top: 50,
+        left: 35,
+        marginTop: 30,
+        zIndex: 10, // ✅ Ensures it's above everything
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#d4af37",
+        textAlign: "center",
+        fontFamily: "Times New Roman",
+        marginBottom: 10,
+        marginTop: 30,
+    },
+    titleLine: {
+        width: "95%", // ✅ Adjust width as needed
+        height: 1, // ✅ Thickness of the line
+        backgroundColor: "#d4af37", // ✅ Golden color like the text
+        alignSelf: "center", // ✅ Centers the line
+        marginTop: 1, // ✅ Spacing from title
+        borderRadius: 2, // ✅ Smooth edges
+        marginBottom: 20,
+    },
     sidebar: {
         position: "absolute",
         left: 0,
@@ -156,20 +185,23 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     sidebarTitle: {
-        fontSize: 20,
+        fontSize: 22,
+        fontFamily: "Times New Roman",
         fontWeight: "bold",
         color: "#d4af37",
         marginBottom: 10,
+        marginTop: 60,
     },
     navItem: {
-        paddingVertical: 10,
+        paddingVertical: 15,
         paddingHorizontal: 5,
         borderRadius: 5,
         marginVertical: 5,
     },
     navText: {
         color: "#fff",
-        fontSize: 16,
+        fontFamily: "Times New Roman",
+        fontSize: 13,
     },
     logoutItem: {
         marginVertical: 10,
@@ -201,14 +233,18 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         padding: 15,
         borderRadius: 10,
+        marginLeft: 7,
+        marginRight: 7,
     },
     cardTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "bold",
+        fontFamily: "Times New Roman",
     },
     cardText: {
-        fontSize: 16,
+        fontSize: 18,
         color: "#444",
+        fontFamily: "Times New Roman",
     },
     buttonContainer: {
         flexDirection: "row",
@@ -223,18 +259,20 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "bold",
+        fontFamily: "Times New Roman",
     },
     menuButton: {
         padding: 10,
         position: "absolute",
-        left: 20,
-        top: 20,
+        left: 15,
+        top: 53,
         zIndex: 15,
     },
     menuText: {
-        fontSize: 24,
+        fontSize: 26,
+        fontFamily: "Times New Roman",
         fontWeight: "bold",
         color: "#d4af37",
     },

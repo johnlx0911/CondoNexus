@@ -6,7 +6,8 @@
  */
 
 // User
-import React from 'react';
+import React, { useEffect } from "react";
+import NfcManager from "react-native-nfc-manager";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -126,6 +127,17 @@ function App(): React.JSX.Element {
     const backgroundStyle = {
         backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     };
+
+    useEffect(() => {
+        // Initialize NFC when app starts
+        NfcManager.start().catch((error) => console.warn("NFC Init Error:", error));
+
+        return () => {
+            // Proper cleanup when app closes
+            NfcManager.cancelTechnologyRequest().catch(() => { });
+            NfcManager.unregisterTagEvent().catch(() => { });
+        };
+    }, []);
 
     return (
         <NavigationContainer>
