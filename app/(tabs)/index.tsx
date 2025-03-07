@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from "react-native";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Modal } from "react-native";
 import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
 import { LinearGradient } from "expo-linear-gradient";
 import { Checkbox } from "react-native-paper";
@@ -80,6 +80,29 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+
+  // ✅ Handle Forgot Password using SendGrid
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) {
+      Alert.alert("Error", "Please enter your email");
+      return;
+    }
+
+    try {
+      console.log("📡 Sending forgot password request to backend...");
+      const response = await axios.post("http://192.168.0.109:5000/api/forgot-password", { email: forgotEmail });
+
+      console.log("✅ Response received:", response.data);
+      Alert.alert("Success", response.data.message);
+      setIsModalVisible(false); // Close the modal after sending
+    } catch (error: any) {
+      console.error("❌ Forgot Password Error:", error.response?.data || error.message);
+      Alert.alert("Error", error.response?.data?.message || "Failed to send reset email");
+    }
+  };
+
   // ✅ Auto-login check
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -118,7 +141,7 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
     }
 
     try {
-      const response = await axios.post("http://192.168.0.220:5000/login", { email, password });
+      const response = await axios.post("http://192.168.0.109:5000/login", { email, password });
 
       if (response.data.token) {
         await AsyncStorage.setItem("userToken", response.data.token);
@@ -197,9 +220,49 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
                 />
               </TouchableOpacity>
               <Text style={styles.rememberText}>Remember Me</Text>
-              <TouchableOpacity>
+
+              {/* ✅ Forgot Password Button */}
+              <TouchableOpacity onPress={() => setIsModalVisible(true)}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
               </TouchableOpacity>
+
+              {/* Forgot Password Modal */}
+              <Modal
+                transparent
+                visible={isModalVisible}
+                animationType="slide"
+                onRequestClose={() => setIsModalVisible(false)}
+              >
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Reset Password</Text>
+                    <Text style={styles.modalText}>Enter your email to reset your password.</Text>
+
+                    <TextInput
+                      style={styles.modalInput}
+                      placeholder="Email"
+                      value={forgotEmail}
+                      onChangeText={setForgotEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity style={styles.modalButton} onPress={handleForgotPassword}>
+                        <Text style={styles.buttonText}>Send Reset Link</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[styles.modalButton, styles.cancelButton]}
+                        onPress={() => setIsModalVisible(false)}
+                      >
+                        <Text style={styles.buttonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
+
             </View>
 
             {/* Login Button */}
@@ -388,4 +451,56 @@ const styles = StyleSheet.create({
     color: "#d4af37",
     fontFamily: "Times New Roman",
   },
+
+  // ✅ Modal Styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    width: "80%",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalInput: {
+    backgroundColor: "#f0f0f0",
+    padding: 10,
+    borderRadius: 5,
+    width: "100%",
+    marginBottom: 15,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  modalButton: {
+    backgroundColor: "#d4af37",
+    padding: 10,
+    borderRadius: 5,
+    width: "48%",
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#888",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+
 });

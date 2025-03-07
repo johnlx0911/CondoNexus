@@ -8,8 +8,13 @@ const cors = require("cors");
 const db = require("./db"); // Import database connection
 
 const app = express();
+const authRoutes = require("./authRoutes"); // Import the new routes
+app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors());
+
+// Use authentication routes
+app.use("/api", authRoutes);
 
 // Middleware to verify JWT
 const verifyToken = (req, res, next) => {

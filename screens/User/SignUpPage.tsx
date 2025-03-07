@@ -25,7 +25,7 @@ const SignUpPage = () => {
     // 📌 Function to handle user signup
     const handleSignUp = async () => {
 
-        const API_URL = "http://192.168.0.220:5000/signup"; // Replace with your IP
+        const API_URL = "http://192.168.0.109:5000/signup"; // Replace with your IP
 
         if (!mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
             Alert.alert("Error", "Please fill in all fields.");

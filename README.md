@@ -68,3 +68,24 @@ MySQL
 To link the project with database
 1. Open terminal, cd to backend, type: "node server.js"
 2. Then a result will show server running on port ****, then mention also connected to MySQL Database
+
+Change Authentication Method (Sometimes will face error during connection server because the authentication method not match)
+1. Open Admin CMD, navigate to where your MySQL downloaded, in this case, navigate to: "C:\Program Files\MySQL\MySQL Server 8.0\bin"
+2. Then type and run: "mysql -u root -p"
+3. We will need to run our databse within the cmd this case, type: "USE mysql;" to use the databse
+4. Alter the user authentication method using this code: 
+   - "ALTER USER 'John'@'%' IDENTIFIED WITH mysql_native_password BY 'your_password';"
+   - FLUSH PRIVILEGES;
+5. And also:
+   - "ALTER USER 'Varsya'@'%' IDENTIFIED WITH mysql_native_password BY 'your_password';"
+   - FLUSH PRIVILEGES;
+6. Reopen MySQL, check the authentication method using this line: "SELECT user, host, plugin FROM mysql.user;"
+7. If correct, Users should be mentioned as mysql_native_password, all done
+
+Push and Retrieve Database from different Node
+1. Open up admin cmd, navigate to the path: "C:\Program Files\MySQL\MySQL Server 8.0\bin"
+2. Then type: "mysqldump -u John -p condonexus > backup.sql"
+3. backup.sql file will be created maybe in C: or C:\Users
+4. Send that file to other node, download it
+5. Same command: "C:\Program Files\MySQL\MySQL Server 8.0\bin"
+6. But this time, use < instead of >, and also 'mysql' instead of 'mysqldump': "mysql -u John -p condonexus < backup.sql"
