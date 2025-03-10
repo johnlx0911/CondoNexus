@@ -25,7 +25,7 @@ const SignUpPage = () => {
     // 📌 Function to handle user signup
     const handleSignUp = async () => {
 
-        const API_URL = "http://192.168.0.109:5000/signup"; // Replace with your IP
+        const API_URL = "http://192.168.0.109:5000/pending-signup"; // Replace with your IP
 
         if (!mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
             Alert.alert("Error", "Please fill in all fields.");
@@ -38,7 +38,6 @@ const SignUpPage = () => {
         }
 
         try {
-
             const response = await fetch(API_URL, {
                 method: "POST",
                 headers: {
@@ -50,13 +49,14 @@ const SignUpPage = () => {
                     password,
                     address,
                     unit_number: unitNumber,
+                    status: "Pending"  // ✅ Add this status field
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                Alert.alert("Success", "User registered successfully!", [
+                Alert.alert("Success", "Signup request sent for admin approval.", [
                     { text: "OK", onPress: () => navigation.navigate("Login") },
                 ]);
             } else {

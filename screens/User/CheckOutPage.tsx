@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
 import Icon from "react-native-vector-icons/Feather";
+import { useStripe } from '@stripe/stripe-react-native';
+import axios from 'axios';
 
 const CheckOutPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const { confirmPayment } = useStripe();
+
     const [dueDate, setDueDate] = useState<string>("");
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
     useEffect(() => {
         const today = new Date();
@@ -34,6 +40,34 @@ const CheckOutPage = () => {
         setDueDate(formattedDueDate);
         setDaysRemaining(daysLeft);
     }, []);
+
+    // Handle Payment Method Selection
+    const handlePaymentMethodSelect = (method: string) => {
+        setSelectedPaymentMethod(method);
+        setIsModalVisible(false); // Close modal after selection
+    };
+
+    const handlePayment = async () => {
+        try {
+            const response = await axios.post('http://localhost:3000/create-payment-intent', {
+                amount: 23452, // Amount in cents (RM234.52)
+                currency: 'myr',
+            });
+
+            const { clientSecret } = response.data;
+            const { error, paymentIntent } = await confirmPayment(clientSecret, {
+                paymentMethodType: "Card",
+            });
+
+            if (error) {
+                alert(`Payment failed: ${error.message}`);
+            } else if (paymentIntent) {
+                alert(`Payment successful! ID: ${paymentIntent.id}`);
+            }
+        } catch (error) {
+            alert("Failed to initiate payment. Please try again.");
+        }
+    };
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -69,16 +103,52 @@ const CheckOutPage = () => {
                 </View>
             </View>
 
-            {/* Payment Method Selection */}
-            <TouchableOpacity style={styles.paymentMethodButton}>
+            {/* Payment Method Button */}
+            <TouchableOpacity
+                style={styles.paymentMethodButton}
+                onPress={() => setIsModalVisible(true)}
+            >
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.paymentGradient}>
                     <Text style={styles.paymentMethodText}>💲 P A Y M E N T  M E T H O D</Text>
-                    <Text style={styles.paymentType}>Card / Online Banking / TnG</Text>
+                    <Text style={styles.paymentType}>
+                        {selectedPaymentMethod || "Select a method"}
+                    </Text>
                 </LinearGradient>
             </TouchableOpacity>
 
+            {/* Payment Modal */}
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Select Payment Method</Text>
+                        <TouchableOpacity onPress={() => handlePaymentMethodSelect("Card")} style={styles.modalOption}>
+                            <Text style={styles.modalOptionText}>💳 Card</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handlePaymentMethodSelect("Online Banking")} style={styles.modalOption}>
+                            <Text style={styles.modalOptionText}>🏦 Online Banking</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handlePaymentMethodSelect("TnG")} style={styles.modalOption}>
+                            <Text style={styles.modalOptionText}>📱 TnG eWallet</Text>
+                        </TouchableOpacity>
+
+                        {/* Close Button */}
+                        <TouchableOpacity
+                            onPress={() => setIsModalVisible(false)}
+                            style={styles.modalCloseButton}
+                        >
+                            <Text style={styles.modalCloseText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
             {/* Confirm Payment */}
-            <TouchableOpacity style={styles.confirmButton}>
+            <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.confirmGradient}>
                     <Text style={styles.confirmText}>P A Y  N O W</Text>
                 </LinearGradient>
@@ -244,6 +314,49 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "Times New Roman",
         fontWeight: "bold",
+    },
+
+    // Modal Styles
+    modalBackground: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    modalContainer: {
+        width: "80%",
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 20
+    },
+    modalTitle: {
+        fontSize: 22,
+        fontFamily: "Times New Roman",
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 20
+    },
+    modalOption: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd"
+    },
+    modalOptionText: {
+        fontSize: 20,
+        fontFamily: "Times New Roman",
+        textAlign: "center"
+    },
+    modalCloseButton: {
+        marginTop: 15,
+        paddingVertical: 10,
+        backgroundColor: "#b88b4a",
+        borderRadius: 10
+    },
+    modalCloseText: {
+        fontSize: 18,
+        fontFamily: "Times New Roman",
+        textAlign: "center",
+        color: "#fff"
     },
 });
 

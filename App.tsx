@@ -28,6 +28,11 @@ import MessagePage from "./screens/User/MessagePage";
 import ContactPage from "./screens/User/ContactPage";
 // User
 
+import { StripeProvider } from '@stripe/stripe-react-native';
+import Constants from 'expo-constants';
+// Correct key extraction to handle undefined/null values
+const STRIPE_PUBLISHABLE_KEY = Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY;
+
 // Admin
 import DashboardPage from "./screens/Admin/DashboardPage";
 import FacilityManagementPage from "./screens/Admin/FacilityManagementPage";
@@ -140,37 +145,41 @@ function App(): React.JSX.Element {
     }, []);
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
-                {/* User */}
-                <Stack.Screen name="Signup" component={SignUpPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
-                <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }} />
-                <Stack.Screen name="Access" component={AccessPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Member" component={MemberPage} options={{ headerShown: false }} />
-                <Stack.Screen name="EditMember" component={EditMemberPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Payment" component={PaymentPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Transaction" component={TransactionPage} options={{ headerShown: false }} />
-                <Stack.Screen name="TransactionDetails" component={TransactionDetailsPage} options={{ headerShown: false }} />
-                <Stack.Screen name="CheckOut" component={CheckOutPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Facility" component={FacilityPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Booking" component={BookingPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Notification" component={NotificationPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Message" component={MessagePage} options={{ headerShown: false }} />
-                <Stack.Screen name="Contact" component={ContactPage} options={{ headerShown: false }} />
-                {/* User */}
+        <StripeProvider
+            publishableKey={Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY || ""}
+        >
+            <NavigationContainer>
+                <Stack.Navigator initialRouteName="Login">
+                    {/* User */}
+                    <Stack.Screen name="Signup" component={SignUpPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Access" component={AccessPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Member" component={MemberPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="EditMember" component={EditMemberPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Payment" component={PaymentPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Transaction" component={TransactionPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="TransactionDetails" component={TransactionDetailsPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="CheckOut" component={CheckOutPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Facility" component={FacilityPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Booking" component={BookingPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Notification" component={NotificationPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Message" component={MessagePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Contact" component={ContactPage} options={{ headerShown: false }} />
+                    {/* User */}
 
-                {/* Admin */}
-                <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
-                <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
-                <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
-                <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
-                <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
-                <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
-                {/* Admin */}
-            </Stack.Navigator>
-        </NavigationContainer>
+                    {/* Admin */}
+                    <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
+                    {/* Admin */}
+                </Stack.Navigator>
+            </NavigationContainer>
+        </StripeProvider>
     );
 }
 

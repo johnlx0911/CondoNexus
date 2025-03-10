@@ -6,17 +6,30 @@ import {
     StyleSheet,
     ScrollView,
     Animated,
+    Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import navigation types
 import Icon from "react-native-vector-icons/Feather";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DashboardPage: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const slideAnim = useState(new Animated.Value(-250))[0]; // Sidebar animation
+
+    // ✅ Handle Logout
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.removeItem("userToken"); // Remove token from storage
+            navigation.replace("Login"); // Redirect back to Login page
+        } catch (error) {
+            console.error("Logout Error:", error);
+            Alert.alert("Error", "Failed to logout. Please try again.");
+        }
+    };
 
     // Toggle Sidebar
     const toggleSidebar = () => {
@@ -57,7 +70,7 @@ const DashboardPage: React.FC = () => {
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Announcement")}>
                     <Text style={styles.navText}>📢  A N N O U N C E M E N T S</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.logoutItem}>
+                <TouchableOpacity style={styles.logoutItem} onPress={handleLogout}>
                     <Text style={styles.navText}>🚪  L O G O U T</Text>
                 </TouchableOpacity>
             </Animated.View>

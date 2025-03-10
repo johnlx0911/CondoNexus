@@ -108,9 +108,13 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
     const checkLoginStatus = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
-        if (token) {
+
+        if (token === "adminToken") {
+          console.log("🔄 Admin token found! Redirecting to Dashboard.");
+          navigation.replace("Dashboard"); // ✅ Redirect to Admin Dashboard
+        } else if (token) {
           console.log("🔄 Token found! Redirecting to Home.");
-          navigation.replace("Home");
+          navigation.replace("Home"); // ✅ Redirect to Home for normal users
         } else {
           console.log("🔄 No token found, staying on Login Page.");
         }
@@ -135,6 +139,23 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
 
   // ✅ Handle Login
   const handleLogin = async () => {
+    // Admin accounts check
+    const adminAccounts = [
+      { email: 'leexing0911@gmail.com', password: 'John@2003' },
+      { email: 'varsya1234@gmail.com', password: 'Varsya@1234' }
+    ];
+
+    // Check if the entered email is one of the admin accounts
+    const adminAccount = adminAccounts.find(
+      (admin) => admin.email === email && admin.password === password
+    );
+
+    if (adminAccount) {
+      await AsyncStorage.setItem("userToken", "adminToken"); // Optional for admin session
+      navigation.replace("Dashboard");  // ✅ Redirect to Dashboard
+      return;  // Prevent further logic from running
+    }
+
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password.");
       return;

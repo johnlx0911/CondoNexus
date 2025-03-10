@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors());
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 // Use authentication routes
 app.use("/api", authRoutes);
 
@@ -38,6 +40,28 @@ const verifyToken = (req, res, next) => {
         res.status(400).json({ message: "Invalid Token." });
     }
 };
+
+// Create Payment Intent Route
+app.post('/create-payment-intent', async (req, res) => {
+    const { amount, currency } = req.body;
+
+    if (!amount || isNaN(amount)) {
+        return res.status(400).json({ error: "Invalid amount provided" });
+    }
+
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: parseInt(amount) * 100,  // Amount in cents
+            currency: currency || 'myr',
+            payment_method_types: ['card'],
+        });
+
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+        console.error('Error creating payment intent:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // 📌 Signup Route
 app.post("/signup", async (req, res) => {
