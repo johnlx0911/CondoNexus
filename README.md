@@ -89,3 +89,7 @@ Push and Retrieve Database from different Node
 4. Send that file to other node, download it
 5. Same command: "C:\Program Files\MySQL\MySQL Server 8.0\bin"
 6. But this time, use < instead of >, and also 'mysql' instead of 'mysqldump': "mysql -u John -p condonexus < backup.sql"
+
+MySQL
+1. To delete specific account from users using specific unique id, type: "DELETE FROM users WHERE id = 1;"
+2. To reset the unique id start from 1, type: "ALTER TABLE users AUTO_INCREMENT = 1;"

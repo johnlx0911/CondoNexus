@@ -1,30 +1,44 @@
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Animated,
-    FlatList,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, FlatList, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
+import axios from "axios";
 
-// Sample residents data
-const residents = [
-    { id: "1", name: "John Doe", unit: "A-01-02", status: "Pending" },
-    { id: "2", name: "Alice Tan", unit: "B-02-05", status: "Approved" },
-    { id: "3", name: "Bob Lee", unit: "C-03-07", status: "Pending" },
-    { id: "4", name: "Sarah Wong", unit: "D-04-10", status: "Approved" },
-];
+type Resident = {
+    id: string;
+    name: string;
+    unit_number: string;
+    status: string;
+};
 
 const ResidentPage: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const slideAnim = useState(new Animated.Value(-250))[0];
+    const [isLoading, setIsLoading] = useState(true);
+    const [residents, setResidents] = useState<Resident[]>([]);
+
+    useEffect(() => {
+        const fetchResidents = async () => {
+            try {
+                const response = await axios.get<Resident[]>("http://192.168.0.109:5000/residents");
+
+                console.log("✅ Residents Fetched:", response.data);  // ✅ Debugging log
+
+                // 🔍 Filter to display only "Pending" residents
+                const pendingResidents = response.data.filter(resident => resident.status === "Pending");
+
+                setResidents(pendingResidents);  // ✅ Set filtered residents
+            } catch (error) {
+                console.error("❌ Error fetching residents:", error);
+            } finally {
+                setIsLoading(false);  // ✅ Stop loading after data fetch
+            }
+        };
+        fetchResidents();
+    }, []);
 
     // Toggle Sidebar
     const toggleSidebar = () => {
@@ -37,9 +51,21 @@ const ResidentPage: React.FC = () => {
     };
 
     // Function to approve a resident
-    const approveResident = (id: string) => {
-        console.log(`Approved resident ${id}`);
-        // In real-world, update this in a database/API
+    const approveResident = async (id: string) => {
+        try {
+            const response = await axios.post(`http://192.168.0.109:5000/approve-resident/${id}`);
+            if (response.data.success) {
+                Alert.alert("Success", "Resident approved successfully.");
+                setResidents(residents.map(resident =>
+                    resident.id === id ? { ...resident, status: "Approved" } : resident
+                ));
+            } else {
+                Alert.alert("Error", "Failed to approve resident. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error approving resident:", error);
+            Alert.alert("Error", "Failed to approve resident.");
+        }
     };
 
     // Function to edit resident details
@@ -50,9 +76,15 @@ const ResidentPage: React.FC = () => {
     };
 
     // Function to terminate a resident
-    const terminateResident = (id: string) => {
-        console.log(`Terminated resident ${id}`);
-        // In real-world, update in the backend/API
+    const terminateResident = async (id: string) => {
+        try {
+            await axios.delete(`http://192.168.0.109:5000/reject-resident/${id}`);
+            Alert.alert("Success", "Resident rejected successfully.");
+            setResidents(residents.filter(resident => resident.id !== id));
+        } catch (error) {
+            console.error("Error rejecting resident:", error);
+            Alert.alert("Error", "Failed to reject resident.");
+        }
     };
 
     return (
@@ -105,10 +137,17 @@ const ResidentPage: React.FC = () => {
                 <FlatList
                     data={residents}
                     keyExtractor={(item) => item.id}
+                    ListEmptyComponent={
+                        !isLoading ? (
+                            <Text style={{ textAlign: "center", color: "white", marginTop: 20, fontFamily: "Times New Roman", fontSize: 24, }}>
+                                No residents found
+                            </Text>
+                        ) : null
+                    }
                     renderItem={({ item }) => (
                         <LinearGradient colors={["#d4af37", "#fff"]} style={styles.card}>
                             <Text style={styles.cardTitle}>{item.name}</Text>
-                            <Text style={styles.cardText}>Unit: {item.unit}</Text>
+                            <Text style={styles.cardText}>Unit: {item.unit_number}</Text>
                             <Text style={[styles.cardText, { color: item.status === "Pending" ? "orange" : "green" }]}>
                                 Status: {item.status}
                             </Text>
@@ -117,8 +156,13 @@ const ResidentPage: React.FC = () => {
                             <View style={styles.buttonContainer}>
                                 {item.status === "Pending" && (
                                     <TouchableOpacity
-                                        style={[styles.button, styles.green]}
+                                        style={[
+                                            styles.button,
+                                            styles.green,
+                                            item.status === "Pending" ? {} : { opacity: 0.5 } // ✅ Correct condition
+                                        ]}
                                         onPress={() => approveResident(item.id)}
+                                        disabled={item.status !== "Pending"} // ✅ Disables if not "Pending"
                                     >
                                         <Text style={styles.buttonText}>Approve</Text>
                                     </TouchableOpacity>
@@ -279,6 +323,10 @@ const styles = StyleSheet.create({
     green: { backgroundColor: "green" },
     blue: { backgroundColor: "blue" },
     red: { backgroundColor: "red" },
+    pendingStatus: {
+        color: "orange",
+        fontWeight: "bold",
+    },
 });
 
 export default ResidentPage;

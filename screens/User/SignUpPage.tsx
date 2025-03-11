@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-    Image, StyleSheet, Text, TextInput, TouchableOpacity, View,
-    KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Alert
-} from "react-native";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +10,7 @@ const SignUpPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
     // States for user input
+    const [name, setName] = useState("");
     const [mobile, setMobile] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -24,8 +22,12 @@ const SignUpPage = () => {
 
     // 📌 Function to handle user signup
     const handleSignUp = async () => {
+        const API_URL = "http://192.168.0.109:5000/signup";
 
-        const API_URL = "http://192.168.0.109:5000/pending-signup"; // Replace with your IP
+        if (!name || !mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
 
         if (!mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
             Alert.alert("Error", "Please fill in all fields.");
@@ -44,27 +46,38 @@ const SignUpPage = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    name,
                     mobile,
                     email,
                     password,
                     address,
                     unit_number: unitNumber,
-                    status: "Pending"  // ✅ Add this status field
                 }),
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get("content-type");
 
-            if (response.ok) {
-                Alert.alert("Success", "Signup request sent for admin approval.", [
+            if (!response.ok) {
+                const errorText = await response.text(); // Log the actual response
+                console.error("❌ Server Error:", errorText);
+                Alert.alert("Error", "Signup failed.");
+                return;
+            }
+
+            if (contentType && contentType.includes("application/json")) {
+                const data = await response.json();
+                Alert.alert("Success", "Signup request submitted. Await admin approval", [
                     { text: "OK", onPress: () => navigation.navigate("Login") },
                 ]);
             } else {
-                Alert.alert("Error", data.message || "Signup failed.");
+                const textResponse = await response.text();
+                console.error("❌ Unexpected Response:", textResponse);
+                Alert.alert("Error", "Unexpected response from the server.");
             }
+
         } catch (error) {
-            Alert.alert("Error", "Something went wrong.");
-            console.error("Signup error:", error);
+            console.error("❌ Signup error:", error);
+            Alert.alert("Error", "Something went wrong. Please try again.");
         }
     };
 
@@ -87,6 +100,15 @@ const SignUpPage = () => {
 
                         {/* Input Fields */}
                         <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your full name"
+                                placeholderTextColor="#ffffff99"
+                                value={name}
+                                onChangeText={setName}
+                            />
+
                             <Text style={styles.label}>Mobile</Text>
                             <TextInput
                                 style={styles.input}
