@@ -166,6 +166,7 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
 
       if (response.data.token) {
         await AsyncStorage.setItem("userToken", response.data.token);
+        await AsyncStorage.setItem("userEmail", email);
         if (checked) {
           await AsyncStorage.setItem("rememberedEmail", email); // ✅ Store email if Remember Me is checked
         } else {

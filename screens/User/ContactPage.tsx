@@ -1,16 +1,59 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import navigation types
 import Icon from "react-native-vector-icons/Feather";
 import { Keyboard, TouchableWithoutFeedback } from "react-native"; // ✅ Import to dismiss keyboard
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ContactPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [subject, setSubject] = useState("");
     const [message, setMessage] = useState("");
+    const [userEmail, setUserEmail] = useState(""); // Store logged-in user's email
+
+    // Fetch logged-in user's email from AsyncStorage
+    useEffect(() => {
+        const getUserEmail = async () => {
+            const storedEmail = await AsyncStorage.getItem('userEmail');
+            console.log("🟡 Stored Email in AsyncStorage:", storedEmail); // <-- Add this to debug
+            setUserEmail(storedEmail || "Unknown User");
+        };
+        getUserEmail();
+    }, []);
+
+    const sendMessage = async () => {
+        if (!subject || !message) {
+            Alert.alert("Error", "Please fill in both the subject and message fields.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:3000/api/send-message", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    sender: userEmail,  // Hardcoded for now
+                    subject,
+                    message
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                Alert.alert("Success", "Message sent successfully!");
+                setSubject("");
+                setMessage("");
+            } else {
+                Alert.alert("Error", "Failed to send the message.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            Alert.alert("Error", "Something went wrong. Please try again.");
+        }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -41,7 +84,7 @@ const ContactPage = () => {
                     {/* FROM */}
                     <View style={styles.rowContainer}>
                         <Text style={styles.label}>From</Text>
-                        <Text style={styles.normalText}>leexing0911@gmail.com</Text>
+                        <Text style={styles.normalText}>{userEmail}</Text>  {/* ✅ Display the stored email */}
                     </View>
                     <View style={styles.separator} />
 
@@ -191,7 +234,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         marginBottom: 20, // ✅ Adds space before the form
         marginRight: 30, // ✅ Slight offset for better placement
-        marginTop: 20, 
+        marginTop: 20,
     },
     bottomNav: {
         position: "absolute",

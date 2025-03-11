@@ -10,8 +10,16 @@ const db = require("./db"); // Import database connection
 const app = express();
 const authRoutes = require("./authRoutes"); // Import the new routes
 app.use(express.json());
-app.use(bodyParser.json());
+const PORT = 3000;
+
+// Middleware
 app.use(cors());
+app.use(bodyParser.json());
+
+// Message Routes
+const messageRoutes = require('./messageRoutes');
+app.use('/api', messageRoutes);
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
