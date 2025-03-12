@@ -34,6 +34,7 @@ import MaintenancePage from "../../screens/Admin/MaintenancePage";
 import ResidentPage from "../../screens/Admin/ResidentPage";
 import ResidentMessagePage from "../../screens/Admin/ResidentMessagePage";
 import AnnouncementPage from "../../screens/Admin/AnnouncementPage";
+import ReplyPage from "../../screens/Admin/ReplyPage";
 // Admin
 
 // Define navigation types
@@ -65,6 +66,11 @@ export type RootStackParamList = {
   ResidentMessage: undefined;
   Resident: { residentId: string };
   Announcement: undefined;
+  Reply: {
+    recipientEmail: String;
+    subject: String;
+    originalMessage: String;
+  }
   // Admin
 };
 
@@ -151,7 +157,8 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
     );
 
     if (adminAccount) {
-      await AsyncStorage.setItem("userToken", "adminToken"); // Optional for admin session
+      await AsyncStorage.setItem("userToken", "adminToken"); // ✅ Admin session
+      await AsyncStorage.setItem("adminEmail", email);        // ✅ Correctly store Admin Email
       navigation.replace("Dashboard");  // ✅ Redirect to Dashboard
       return;  // Prevent further logic from running
     }
@@ -162,15 +169,15 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
     }
 
     try {
-      const response = await axios.post("http://192.168.0.109:5000/login", { email, password });
+      const response = await axios.post("http://192.168.0.100:5000/login", { email, password });
 
       if (response.data.token) {
         await AsyncStorage.setItem("userToken", response.data.token);
-        await AsyncStorage.setItem("userEmail", email);
+        await AsyncStorage.setItem("userEmail", email);     // ✅ Correctly store User Email
         if (checked) {
-          await AsyncStorage.setItem("rememberedEmail", email); // ✅ Store email if Remember Me is checked
+          await AsyncStorage.setItem("rememberedEmail", email);  // ✅ Store email if Remember Me is checked
         } else {
-          await AsyncStorage.removeItem("rememberedEmail"); // ✅ Remove if unchecked
+          await AsyncStorage.removeItem("rememberedEmail");      // ✅ Remove if unchecked
         }
         navigation.replace("Home");
       } else {
@@ -339,6 +346,7 @@ export default function AppNavigator() {
       <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
       <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
       <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
+      <Stack.Screen name="Reply" component={ReplyPage} options={{ headerShown: false }} />
       {/* Admin */}
     </Stack.Navigator>
   );

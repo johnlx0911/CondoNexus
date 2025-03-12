@@ -8,25 +8,42 @@ import Icon from "react-native-vector-icons/Feather";
 import { Keyboard, TouchableWithoutFeedback } from "react-native"; // ✅ Import to dismiss keyboard
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ContactPage = () => {
+import { RouteProp, useRoute } from "@react-navigation/native";
+type ReplyPageRouteProp = RouteProp<RootStackParamList, 'Reply'>;
+
+const ReplyPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-    const [subject, setSubject] = useState("");
-    const [message, setMessage] = useState("");
-    const [userEmail, setUserEmail] = useState(""); // Store logged-in user's email
+    const route = useRoute<ReplyPageRouteProp>(); // ✅ Correctly defines 'route'
+
+    const [recipientEmail, setRecipientEmail] = useState(route.params?.recipientEmail || "");
+    const [subject, setSubject] = useState(route.params?.subject || "");
+    const [originalMessage, setOriginalMessage] = useState(route.params?.originalMessage || "");
+    const [composeMessage, setComposeMessage] = useState("");
+    const [userEmail, setUserEmail] = useState("");  // Admin's email
+
+    // Fetch logged-in admin's email
+    useEffect(() => {
+        const getAdminEmail = async () => {
+            const storedAdminEmail = await AsyncStorage.getItem('adminEmail');
+            console.log("🟡 Stored Admin Email in AsyncStorage:", storedAdminEmail); // ✅ Debugging log
+            setUserEmail(storedAdminEmail || "Unknown User"); // ✅ Auto-fill admin's email
+        };
+        getAdminEmail();
+    }, []);
 
     // Fetch logged-in user's email from AsyncStorage
     useEffect(() => {
         const getUserEmail = async () => {
-            const storedEmail = await AsyncStorage.getItem('userEmail');
-            console.log("🟡 Stored Email in AsyncStorage:", storedEmail); // <-- Add this to debug
-            setUserEmail(storedEmail || "Unknown User");
+            const storedUserEmail = await AsyncStorage.getItem('userEmail');
+            console.log("🟢 Stored User Email in AsyncStorage:", storedUserEmail); // ✅ Debugging log
+            setRecipientEmail(storedUserEmail || "Unknown User"); // ✅ Correctly set User's email
         };
         getUserEmail();
     }, []);
 
     const sendMessage = async () => {
-        if (!subject || !message) {
-            Alert.alert("Error", "Please fill in both the subject and message fields.");
+        if (!composeMessage) {
+            Alert.alert("Error", "Please fill in the compose message field.");
             return;
         }
 
@@ -35,21 +52,24 @@ const ContactPage = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    sender: userEmail,  // Hardcoded for now
-                    subject,
-                    message,
-                    timestamp: new Date().toISOString(), // ✅ Add timestamp for sorting
-                    type: 'user'                  // ✅ Identify this message as a user-sent message
+                    recipient: recipientEmail,  // ✅ To - User's email
+                    sender: userEmail,         // ✅ From - Admin's email
+                    subject: subject,          // ✅ Subject auto-filled
+                    message: composeMessage,   // ✅ Composed reply
+                    timestamp: new Date().toISOString(),  // ✅ Add timestamp for sorting in NotificationPage.tsx
+                    type: 'admin'              // ✅ Marks this message as admin-sent
                 }),
             });
 
             const data = await response.json();
             if (data.success) {
-                Alert.alert("Success", "Message sent successfully!");
-                setSubject("");  // Clear the input fields
-                setMessage("");  // Clear the input fields
+                Alert.alert("Success", "Reply sent successfully!");
+                setComposeMessage("");  // ✅ Clear the input field
+
+                // Navigate to the NotificationPage and refresh the list
+                navigation.navigate("Notification");
             } else {
-                Alert.alert("Error", "Failed to send the message.");
+                Alert.alert("Error", "Failed to send the reply.");
             }
         } catch (error) {
             console.error("Error:", error);
@@ -66,7 +86,7 @@ const ContactPage = () => {
                 </TouchableOpacity>
 
                 {/* Page Title */}
-                <Text style={styles.title}>N O T I F I C A T I O N</Text>
+                <Text style={styles.title}>R E P L Y</Text>
                 <View style={styles.titleLine} />
 
                 {/* Send Button */}
@@ -82,39 +102,39 @@ const ContactPage = () => {
                     {/* TO */}
                     <View style={styles.rowContainer}>
                         <Text style={styles.label}>To</Text>
-                        <Text style={styles.boldText}>Admin</Text>
+                        <Text style={styles.boldText}>{recipientEmail}</Text>
                     </View>
                     <View style={styles.separator} />
 
                     {/* FROM */}
                     <View style={styles.rowContainer}>
                         <Text style={styles.label}>From</Text>
-                        <Text style={styles.normalText}>{userEmail}</Text>  {/* ✅ Display the stored email */}
+                        <Text style={styles.boldText}>{userEmail}</Text>
                     </View>
                     <View style={styles.separator} />
 
                     {/* SUBJECT */}
                     <View style={styles.rowContainer}>
                         <Text style={styles.label}>Subject</Text>
-                        <TextInput
-                            style={styles.inputField}
-                            placeholder=""
-                            placeholderTextColor="#ffffff99"
-                            value={subject}
-                            onChangeText={setSubject}
-                        />
+                        <Text style={styles.boldText}>{subject}</Text>
+                    </View>
+                    <View style={styles.separator} />
+
+                    {/* MESSAGE (Original Message) */}
+                    <View style={styles.rowContainer}>
+                        <Text style={styles.label}>Message</Text>
+                        <Text style={styles.boldText}>{originalMessage}</Text>
                     </View>
                     <View style={styles.separator} />
 
                     {/* COMPOSE MESSAGE */}
-                    <Text style={styles.composeLabel}>Compose Message</Text>
                     <TextInput
                         style={styles.messageField}
-                        placeholder=""
+                        placeholder="Type your reply..."
                         placeholderTextColor="#ffffff99"
                         multiline
-                        value={message}
-                        onChangeText={setMessage}
+                        value={composeMessage}
+                        onChangeText={setComposeMessage}
                     />
                 </View>
 
@@ -268,4 +288,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ContactPage;
+export default ReplyPage;

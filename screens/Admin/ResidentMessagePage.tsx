@@ -1,31 +1,46 @@
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Animated,
-    FlatList,
-    TextInput,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, FlatList, TextInput, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 
-// Sample messages data
-const residentMessages = [
-    { id: "1", sender: "John Doe", subject: "Facility Issue", message: "The gym equipment is broken.", status: "Unread" },
-    { id: "2", sender: "Alice", subject: "Billing Question", message: "I need help with my latest invoice.", status: "Read" },
-    { id: "3", sender: "Bob", subject: "Security Concern", message: "Unauthorized entry was detected last night.", status: "Unread" },
-];
+type Message = {
+    id: number;        // ✅ Changed to number (for real data consistency)
+    sender: string;
+    subject: string;
+    message: string;
+    status: string;
+};
 
 const ResidentPage: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const slideAnim = useState(new Animated.Value(-250))[0];
     const [replyMessage, setReplyMessage] = useState("");
+    const [residentMessages, setResidentMessages] = useState<Message[]>([]);
+
+    // Function to fetch messages
+    const fetchMessages = async () => {
+        try {
+            const response = await fetch("http://192.168.0.100:3000/api/get-messages");
+            const data: Message[] = await response.json();  // ✅ Type-casting here
+
+            if (Array.isArray(data)) {
+                setResidentMessages(data); // ✅ Set fetched data
+            } else {
+                Alert.alert("Error", "Failed to load messages.");
+            }
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            Alert.alert("Error", "Something went wrong. Please try again.");
+        }
+    };
+
+    // Fetch messages when the page loads
+    useEffect(() => {
+        fetchMessages();
+    }, []);
 
     // Toggle Sidebar
     const toggleSidebar = () => {
@@ -38,19 +53,17 @@ const ResidentPage: React.FC = () => {
     };
 
     // Function to reply to a message
-    const replyToMessage = (id: string) => {
-        console.log(`Replying to message ${id}: ${replyMessage}`);
-        setReplyMessage(""); // Clear input after sending
+    const replyToMessage = (id: number) => {
+        console.log(`Replying to message ${id}`);
     };
 
     // Function to delete a message
-    const deleteMessage = (id: string) => {
+    const deleteMessage = (id: number) => {
         console.log(`Deleted message ${id}`);
-        // In real-world, this would involve an API call to update the database.
     };
 
     // Function to mark message as read/unread
-    const toggleReadStatus = (id: string, currentStatus: string) => {
+    const toggleReadStatus = (id: number, currentStatus: string) => {
         const newStatus = currentStatus === "Unread" ? "Read" : "Unread";
         console.log(`Message ${id} marked as ${newStatus}`);
     };
@@ -104,45 +117,59 @@ const ResidentPage: React.FC = () => {
                 {/* Messages List */}
                 <FlatList
                     data={residentMessages}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.id.toString() || Math.random().toString()}
                     renderItem={({ item }) => (
-                        <LinearGradient colors={["#d4af37", "#fff"]} style={styles.card}>
-                            <Text style={styles.cardTitle}>{item.subject}</Text>
-                            <Text style={styles.cardText}>From: {item.sender}</Text>
-                            <Text style={styles.cardText}>{item.message}</Text>
-                            <Text style={[styles.cardText, { color: item.status === "Unread" ? "orange" : "green" }]}>
-                                Status: {item.status}
-                            </Text>
+                        <TouchableOpacity onPress={() => {
+                            console.log("✅ Navigating to Reply Page");
+                            navigation.navigate("Reply", {
+                                recipientEmail: item.sender,
+                                subject: item.subject,
+                                originalMessage: item.message
+                            });
+                        }}>
+                            <LinearGradient
+                                colors={["#d4af37", "#fff"]}
+                                style={styles.card}
+                                pointerEvents="box-none"
+                            >
+                                <Text style={styles.subject}>{item.subject}</Text>
+                                <Text style={styles.message}>{item.message}</Text>
+                                <Text style={styles.sender}>From: {item.sender}</Text>
+                                <Text style={styles.status}>
+                                    Status: {item.status === "Unread" ? "🔶 Unread" : "✅ Read"}
+                                </Text>
 
-                            {/* Reply Input */}
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Type your reply..."
-                                placeholderTextColor="#444"
-                                value={replyMessage}
-                                onChangeText={setReplyMessage}
-                            />
+                                {/* Reply Input */}
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Type your reply..."
+                                    placeholderTextColor="#444"
+                                    value={replyMessage}
+                                    onChangeText={setReplyMessage}
+                                />
 
-                            {/* Action Buttons */}
-                            <View style={styles.buttonContainer}>
-                                <TouchableOpacity style={[styles.button, styles.green]} onPress={() => replyToMessage(item.id)}>
-                                    <Text style={styles.buttonText}>Reply</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.button, styles.blue]}
-                                    onPress={() => toggleReadStatus(item.id, item.status)}
-                                >
-                                    <Text style={styles.buttonText}>{item.status === "Unread" ? "Mark as Read" : "Mark as Unread"}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.button, styles.red]} onPress={() => deleteMessage(item.id)}>
-                                    <Text style={styles.buttonText}>Delete</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </LinearGradient>
+                                {/* Action Buttons */}
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity onPress={() => replyToMessage(item.id)}>
+                                        <Text style={styles.buttonText}>Reply</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity onPress={() => toggleReadStatus(item.id, item.status)}>
+                                        <Text style={styles.buttonText}>
+                                            {item.status === "Unread" ? "Mark as Read" : "Mark as Unread"}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity onPress={() => deleteMessage(item.id)}>
+                                        <Text style={styles.buttonText}>Delete</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </LinearGradient>
+                        </TouchableOpacity>
                     )}
                 />
             </ScrollView>
-        </LinearGradient>
+        </LinearGradient >
     );
 };
 
@@ -291,6 +318,25 @@ const styles = StyleSheet.create({
     green: { backgroundColor: "green" },
     blue: { backgroundColor: "blue" },
     red: { backgroundColor: "red" },
+    subject: {
+        fontWeight: "bold",
+        fontSize: 18,
+        color: "#000",
+        marginBottom: 5,
+    },
+    message: {
+        marginVertical: 5,
+        color: "#444",
+    },
+    sender: {
+        color: "#777",
+        fontSize: 14,
+    },
+    status: {
+        marginTop: 5,
+        fontWeight: "bold",
+        color: "#d4af37",
+    }
 });
 
 export default ResidentPage;

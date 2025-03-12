@@ -41,6 +41,7 @@ import MaintenancePage from "./screens/Admin/MaintenancePage";
 import ResidentPage from "./screens/Admin/ResidentPage";
 import ResidentMessagePage from "./screens/Admin/ResidentMessagePage";
 import AnnouncementPage from "./screens/Admin/AnnouncementPage";
+import ReplyPage from "./screens/Admin/ReplyPage";
 // Admin
 
 import type { PropsWithChildren } from 'react';
@@ -94,6 +95,11 @@ export type RootStackParamList = {
     ResidentMessage: undefined;
     Resident: { residentId: string };
     Announcement: undefined;
+    Reply: {
+        recipientEmail: String;
+        subject: String;
+        originalMessage: String;
+    }
     // Admin
 };
 
@@ -176,6 +182,7 @@ function App(): React.JSX.Element {
                     <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
                     <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
                     <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Reply" component={ReplyPage} options={{ headerShown: false }} />
                     {/* Admin */}
                 </Stack.Navigator>
             </NavigationContainer>

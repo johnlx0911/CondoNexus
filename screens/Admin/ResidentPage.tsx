@@ -23,14 +23,12 @@ const ResidentPage: React.FC = () => {
     useEffect(() => {
         const fetchResidents = async () => {
             try {
-                const response = await axios.get<Resident[]>("http://192.168.0.109:5000/residents");
+                const response = await axios.get<Resident[]>("http://192.168.0.100:5000/residents");
 
                 console.log("✅ Residents Fetched:", response.data);  // ✅ Debugging log
 
-                // 🔍 Filter to display only "Pending" residents
-                const pendingResidents = response.data.filter(resident => resident.status === "Pending");
-
-                setResidents(pendingResidents);  // ✅ Set filtered residents
+                // 🔍 REMOVE THIS FILTER to show both "Pending" and "Approved"
+                setResidents(response.data);  // ✅ Set filtered residents
             } catch (error) {
                 console.error("❌ Error fetching residents:", error);
             } finally {
@@ -53,7 +51,7 @@ const ResidentPage: React.FC = () => {
     // Function to approve a resident
     const approveResident = async (id: string) => {
         try {
-            const response = await axios.post(`http://192.168.0.109:5000/approve-resident/${id}`);
+            const response = await axios.post(`http://192.168.0.100:5000/approve-resident/${id}`);
             if (response.data.success) {
                 Alert.alert("Success", "Resident approved successfully.");
                 setResidents(residents.map(resident =>
@@ -78,7 +76,7 @@ const ResidentPage: React.FC = () => {
     // Function to terminate a resident
     const terminateResident = async (id: string) => {
         try {
-            await axios.delete(`http://192.168.0.109:5000/reject-resident/${id}`);
+            await axios.delete(`http://192.168.0.100:5000/reject-resident/${id}`);
             Alert.alert("Success", "Resident rejected successfully.");
             setResidents(residents.filter(resident => resident.id !== id));
         } catch (error) {
@@ -154,25 +152,24 @@ const ResidentPage: React.FC = () => {
 
                             {/* Action Buttons */}
                             <View style={styles.buttonContainer}>
+                                {/* ✅ Show Approve Button Only for "Pending" Residents */}
                                 {item.status === "Pending" && (
                                     <TouchableOpacity
-                                        style={[
-                                            styles.button,
-                                            styles.green,
-                                            item.status === "Pending" ? {} : { opacity: 0.5 } // ✅ Correct condition
-                                        ]}
+                                        style={[styles.button, styles.green]}
                                         onPress={() => approveResident(item.id)}
-                                        disabled={item.status !== "Pending"} // ✅ Disables if not "Pending"
                                     >
                                         <Text style={styles.buttonText}>Approve</Text>
                                     </TouchableOpacity>
                                 )}
+
+                                {/* ✅ Always Show Edit and Terminate for Both Statuses */}
                                 <TouchableOpacity
                                     style={[styles.button, styles.blue]}
                                     onPress={() => editResident(item.id)}
                                 >
                                     <Text style={styles.buttonText}>Edit</Text>
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     style={[styles.button, styles.red]}
                                     onPress={() => terminateResident(item.id)}
