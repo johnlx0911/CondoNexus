@@ -1,20 +1,71 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Alert, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Icon from "react-native-vector-icons/Feather";
 
-const notifications = [
-    { id: 1, sender: "Member", title: "Notification, please be inform...", body: "This is a test notification", time: "5:09 PM" },
-    { id: 2, sender: "Facility", title: "Thanks for visit! See you next ...", body: "Your facility booking was successful", time: "4:30 PM" },
-    { id: 3, sender: "Admin", title: "Good news! You have been cho...", body: "You are selected as Resident of the Month", time: "2:45 PM" },
-    { id: 4, sender: "Payment", title: "Reminder, please be inform th...", body: "Your payment is due soon", time: "1:15 PM" },
-    { id: 5, sender: "Facility", title: "Your facility booking was suc...", body: "Confirmation of your facility booking", time: "11:50 AM" },
-];
+// Type definition for dynamic notifications
+type Notification = {
+    id: number;
+    sender: string;
+    subject: string;
+    message: string;
+    status: string;
+    createdAt: string; // ✅ Corrected for timestamp usage
+    type: string; // ✅ Identify if the message is from 'admin'
+};
 
 const NotificationPage = () => {
     const navigation = useNavigation<StackNavigationProp<any>>();
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [isLoading, setIsLoading] = useState(false);  // ✅ Loading State
+
+    // ✅ Fetch Notifications Function
+    const fetchNotifications = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch("http://192.168.0.109:3000/api/get-messages");
+            const data: Notification[] = await response.json();
+
+            if (Array.isArray(data)) {
+                setNotifications(data);
+            } else {
+                Alert.alert("Error", "Failed to load notifications.");
+            }
+        } catch (error) {
+            console.error("Error fetching notifications:", error);
+            Alert.alert("Error", "Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);  // ✅ Hide Loading Indicator
+        }
+    };
+
+    // ✅ Auto-fetch notifications when page loads
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    // ✅ Improved Notification Handling Function
+    const handleNotificationPress = (item: Notification) => {
+        const formatDate = (dateString: string) => {
+            return new Date(dateString).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        };
+
+        // Display message details directly in an alert
+        Alert.alert(
+            item.subject,
+            `${item.message}\n\n🕒 ${formatDate(item.createdAt)}`,
+            [{ text: "OK" }]
+        );
+    };
+
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -27,26 +78,44 @@ const NotificationPage = () => {
             <Text style={styles.title}>N O T I F I C A T I O N</Text>
             <View style={styles.titleLine} />
 
+            {/* Refresh Button */}
+            <TouchableOpacity onPress={fetchNotifications} style={styles.refreshButton}>
+                <Icon name="refresh-cw" size={20} color="#d4af37" />
+                <Text style={styles.refreshText}>Refresh</Text>
+            </TouchableOpacity>
+
             {/* Scrollable Content */}
             <View style={styles.contentContainer}>
-                <ScrollView contentContainerStyle={styles.notificationList}>
-                    {notifications.map((item) => (
-                        <TouchableOpacity
-                            key={item.id}
-                            style={styles.notificationItem}
-                            onPress={() => navigation.navigate("Message", { message: item })}
-                        >
-                            <View style={styles.notificationContent}>
-                                <Image source={require("../../assets/profile-icon.png")} style={styles.notificationImage} />
-                                <View>
-                                    <Text style={styles.senderName}>{item.sender}</Text>
-                                    <Text style={styles.notificationText}>{item.title}</Text>
+                {isLoading ? (
+                    <ActivityIndicator size="large" color="#d4af37" />
+                ) : notifications.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Icon name="inbox" size={50} color="#d4af37" />
+                        <Text style={styles.noNotificationText}>No notifications yet.</Text>
+                    </View>
+                ) : (
+                    <ScrollView contentContainerStyle={styles.notificationList}>
+                        {notifications.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={styles.notificationItem}
+                                onPress={() => handleNotificationPress(item)}
+                            >
+                                <View style={styles.notificationContent}>
+                                    <Image
+                                        source={require("../../assets/profile-icon.png")}
+                                        style={styles.notificationImage}
+                                    />
+                                    <View>
+                                        <Text style={styles.senderName}>{item.sender}</Text>
+                                        <Text style={styles.notificationText}>{item.subject}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <Icon name="chevron-right" size={20} color="#fff" />
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                                <Icon name="chevron-right" size={20} color="#fff" />
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                )}
 
                 {/* Contact Manager Button (Now Visible & Positioned Properly) */}
                 <View style={styles.buttonsContainer}>
@@ -56,6 +125,7 @@ const NotificationPage = () => {
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
+
             </View>
 
             {/* Bottom Navigation */}
@@ -90,7 +160,7 @@ const styles = StyleSheet.create({
         top: 50,
         left: 35,
         marginTop: 30,
-        zIndex: 10, // ✅ Ensures it's above everything
+        zIndex: 10,
     },
     title: {
         fontSize: 24,
@@ -102,25 +172,43 @@ const styles = StyleSheet.create({
         marginTop: 30,
     },
     titleLine: {
-        width: "85%", // ✅ Adjust width as needed
-        height: 1, // ✅ Thickness of the line
-        backgroundColor: "#d4af37", // ✅ Golden color like the text
-        alignSelf: "center", // ✅ Centers the line
-        marginTop: 1, // ✅ Spacing from title
-        borderRadius: 2, // ✅ Smooth edges
+        width: "85%",
+        height: 1,
+        backgroundColor: "#d4af37",
+        alignSelf: "center",
+        marginTop: 1,
+        borderRadius: 2,
         marginBottom: 10,
+    },
+    refreshButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    refreshText: {
+        color: "#d4af37",
+        marginLeft: 5,
+        fontSize: 16,
     },
     contentContainer: {
         flex: 1,
         width: "90%",
-        justifyContent: "space-between",
-        marginBottom: 10,
-        alignItems: "center", // ✅ Centering items
+        alignItems: "center",
+    },
+    emptyContainer: {
+        alignItems: "center",
+        marginTop: 50,
+    },
+    noNotificationText: {
+        color: "#fff",
+        fontSize: 16,
+        marginTop: 10,
+        fontFamily: "Times New Roman",
     },
     notificationList: {
         paddingBottom: 10,
-        width: "120%",
-        alignItems: "center", // ✅ Ensures the list is centered
+        width: "100%",
+        alignItems: "center",
     },
     notificationItem: {
         flexDirection: "row",
@@ -130,8 +218,7 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255,255,255,0.1)",
         borderRadius: 15,
         marginBottom: 8,
-        marginTop: 10,
-        width: "80%", // ✅ Reduced width to match title line
+        width: "100%",
         alignItems: "center",
     },
     notificationContent: {
@@ -148,12 +235,10 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         color: "#d4af37",
-        fontFamily: "Times New Roman",
     },
     notificationText: {
         fontSize: 16,
         color: "#fff",
-        fontFamily: "Times New Roman",
     },
     buttonWrapper: {
         width: "85%", // ✅ Ensures the entire button is clickable
@@ -161,7 +246,7 @@ const styles = StyleSheet.create({
     },
     buttonsContainer: {
         position: "absolute",
-        bottom: 120, // ✅ Puts the buttons above the bottom navigation bar
+        bottom: 125, // ✅ Puts the buttons above the bottom navigation bar
         width: "110%",
         alignSelf: "center",
     },
@@ -193,11 +278,6 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: "space-around",
         alignSelf: "center",
-        elevation: 5,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
     },
     navButton: {
         alignItems: "center",
@@ -205,8 +285,6 @@ const styles = StyleSheet.create({
     navText: {
         color: "#000",
         fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
     },
 });
 

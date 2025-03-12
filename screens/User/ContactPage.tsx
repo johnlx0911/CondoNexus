@@ -31,10 +31,11 @@ const ContactPage = () => {
         }
 
         try {
-            const response = await fetch("http://192.168.0.100:3000/api/send-message", {
+            const response = await fetch("http://192.168.0.109:3000/api/send-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    recipient: "leexing0911@gmail.com",  // ✅ Fixed missing field
                     sender: userEmail,  // Hardcoded for now
                     subject,
                     message,

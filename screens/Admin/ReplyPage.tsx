@@ -9,11 +9,22 @@ import { Keyboard, TouchableWithoutFeedback } from "react-native"; // ✅ Import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { RouteProp, useRoute } from "@react-navigation/native";
-type ReplyPageRouteProp = RouteProp<RootStackParamList, 'Reply'>;
+// Updated Route Prop Type
+type ReplyPageRouteProp = RouteProp<RootStackParamList, 'Reply'> & {
+    params: {
+        messageId: number;         // ✅ Added messageId parameter
+        recipientEmail: string;
+        subject: string;
+        originalMessage: string;
+    };
+};
 
 const ReplyPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-    const route = useRoute<ReplyPageRouteProp>(); // ✅ Correctly defines 'route'
+    const route = useRoute<ReplyPageRouteProp>();  // ✅ Correctly defines route
+
+    // Extract messageId in ReplyPage
+    const { messageId } = route.params;
 
     const [recipientEmail, setRecipientEmail] = useState(route.params?.recipientEmail || "");
     const [subject, setSubject] = useState(route.params?.subject || "");
@@ -41,14 +52,18 @@ const ReplyPage = () => {
         getUserEmail();
     }, []);
 
+    const [isLoading, setIsLoading] = useState(false); // ✅ Add loading state
+
     const sendMessage = async () => {
         if (!composeMessage) {
             Alert.alert("Error", "Please fill in the compose message field.");
             return;
         }
 
+        setIsLoading(true); // ✅ Show loading during request
+
         try {
-            const response = await fetch("http://192.168.0.100:3000/api/send-message", {
+            const response = await fetch("http://192.168.0.109:3000/api/send-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -57,7 +72,8 @@ const ReplyPage = () => {
                     subject: subject,          // ✅ Subject auto-filled
                     message: composeMessage,   // ✅ Composed reply
                     timestamp: new Date().toISOString(),  // ✅ Add timestamp for sorting in NotificationPage.tsx
-                    type: 'admin'              // ✅ Marks this message as admin-sent
+                    type: 'admin',              // ✅ Marks this message as admin-sent
+                    messageId: messageId  // ✅ Add this line to include messageId
                 }),
             });
 
@@ -65,15 +81,15 @@ const ReplyPage = () => {
             if (data.success) {
                 Alert.alert("Success", "Reply sent successfully!");
                 setComposeMessage("");  // ✅ Clear the input field
-
-                // Navigate to the NotificationPage and refresh the list
-                navigation.navigate("Notification");
+                navigation.goBack();    // ✅ Navigate back to ResidentMessagePage.tsx
             } else {
                 Alert.alert("Error", "Failed to send the reply.");
             }
         } catch (error) {
             console.error("Error:", error);
             Alert.alert("Error", "Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false); // ✅ Hide loading indicator
         }
     };
 

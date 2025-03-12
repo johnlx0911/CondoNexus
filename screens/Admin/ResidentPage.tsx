@@ -23,7 +23,7 @@ const ResidentPage: React.FC = () => {
     useEffect(() => {
         const fetchResidents = async () => {
             try {
-                const response = await axios.get<Resident[]>("http://192.168.0.100:5000/residents");
+                const response = await axios.get<Resident[]>("http://192.168.0.109:5000/residents");
 
                 console.log("✅ Residents Fetched:", response.data);  // ✅ Debugging log
 
@@ -51,7 +51,7 @@ const ResidentPage: React.FC = () => {
     // Function to approve a resident
     const approveResident = async (id: string) => {
         try {
-            const response = await axios.post(`http://192.168.0.100:5000/approve-resident/${id}`);
+            const response = await axios.post(`http://192.168.0.109:5000/approve-resident/${id}`);
             if (response.data.success) {
                 Alert.alert("Success", "Resident approved successfully.");
                 setResidents(residents.map(resident =>
@@ -76,7 +76,7 @@ const ResidentPage: React.FC = () => {
     // Function to terminate a resident
     const terminateResident = async (id: string) => {
         try {
-            await axios.delete(`http://192.168.0.100:5000/reject-resident/${id}`);
+            await axios.delete(`http://192.168.0.109:5000/reject-resident/${id}`);
             Alert.alert("Success", "Resident rejected successfully.");
             setResidents(residents.filter(resident => resident.id !== id));
         } catch (error) {

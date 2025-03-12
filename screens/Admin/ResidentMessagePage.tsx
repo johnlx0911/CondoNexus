@@ -20,14 +20,14 @@ const ResidentPage: React.FC = () => {
     const [replyMessage, setReplyMessage] = useState("");
     const [residentMessages, setResidentMessages] = useState<Message[]>([]);
 
-    // Function to fetch messages
+    // ✅ Updated fetchMessages to refresh properly
     const fetchMessages = async () => {
         try {
-            const response = await fetch("http://192.168.0.100:3000/api/get-messages");
-            const data: Message[] = await response.json();  // ✅ Type-casting here
+            const response = await fetch("http://192.168.0.109:3000/api/get-resident-messages");
+            const data: Message[] = await response.json();
 
             if (Array.isArray(data)) {
-                setResidentMessages(data); // ✅ Set fetched data
+                setResidentMessages(data);  // ✅ Show only resident messages
             } else {
                 Alert.alert("Error", "Failed to load messages.");
             }
@@ -66,6 +66,33 @@ const ResidentPage: React.FC = () => {
     const toggleReadStatus = (id: number, currentStatus: string) => {
         const newStatus = currentStatus === "Unread" ? "Read" : "Unread";
         console.log(`Message ${id} marked as ${newStatus}`);
+    };
+
+    // Function to mark message as Read
+    const markAsRead = async (id: number) => {
+        try {
+            const response = await fetch(`http://192.168.0.109:3000/api/update-status/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "Read" }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                console.log(`✅ Message ${id} marked as 'Read'`);
+
+                // ✅ Directly update the local state to improve UI responsiveness
+                setResidentMessages((prevMessages) =>
+                    prevMessages.map((msg) =>
+                        msg.id === id ? { ...msg, status: "Read" } : msg
+                    )
+                );
+            } else {
+                console.error(`❌ Failed to mark message ${id} as 'Read'`);
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
     };
 
     return (
@@ -121,7 +148,9 @@ const ResidentPage: React.FC = () => {
                     renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => {
                             console.log("✅ Navigating to Reply Page");
+                            markAsRead(item.id);  // ✅ Mark as 'Read' when clicked
                             navigation.navigate("Reply", {
+                                messageId: item.id,     // ✅ Pass `messageId` to ReplyPage.tsx
                                 recipientEmail: item.sender,
                                 subject: item.subject,
                                 originalMessage: item.message
@@ -136,7 +165,7 @@ const ResidentPage: React.FC = () => {
                                 <Text style={styles.message}>{item.message}</Text>
                                 <Text style={styles.sender}>From: {item.sender}</Text>
                                 <Text style={styles.status}>
-                                    Status: {item.status === "Unread" ? "🔶 Unread" : "✅ Read"}
+                                    Status: {item.status === "Unread" ? "🔶 Unread" : item.status === "Read" ? "✅ Read" : "📩 Replied"}
                                 </Text>
 
                                 {/* Reply Input */}

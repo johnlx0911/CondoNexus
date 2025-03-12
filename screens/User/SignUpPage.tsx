@@ -22,7 +22,7 @@ const SignUpPage = () => {
 
     // 📌 Function to handle user signup
     const handleSignUp = async () => {
-        const API_URL = "http://192.168.0.100:5000/signup";
+        const API_URL = "http://192.168.0.109:5000/signup";
 
         if (!name || !mobile || !email || !password || !confirmPassword || !address || !unitNumber) {
             Alert.alert("Error", "Please fill in all fields.");

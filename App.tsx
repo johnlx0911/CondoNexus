@@ -96,6 +96,7 @@ export type RootStackParamList = {
     Resident: { residentId: string };
     Announcement: undefined;
     Reply: {
+        messageId: number;         // ✅ Added `messageId` here
         recipientEmail: String;
         subject: String;
         originalMessage: String;

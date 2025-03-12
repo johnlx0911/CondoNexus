@@ -67,6 +67,7 @@ export type RootStackParamList = {
   Resident: { residentId: string };
   Announcement: undefined;
   Reply: {
+    messageId: number;         // ✅ Added `messageId` here
     recipientEmail: String;
     subject: String;
     originalMessage: String;
@@ -169,7 +170,7 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
     }
 
     try {
-      const response = await axios.post("http://192.168.0.100:5000/login", { email, password });
+      const response = await axios.post("http://192.168.0.109:5000/login", { email, password });
 
       if (response.data.token) {
         await AsyncStorage.setItem("userToken", response.data.token);
