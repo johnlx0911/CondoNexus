@@ -25,7 +25,9 @@ const ResidentPage: React.FC = () => {
 
     // ✅ Updated fetchMessages to refresh properly
     const fetchMessages = async () => {
+        if (loading) return;  // ✅ Prevent multiple simultaneous requests
         setLoading(true); // ✅ Start loading state
+
         try {
             const response = await fetch("http://192.168.0.109:3000/api/get-resident-messages");
             const data: Message[] = await response.json();
@@ -46,8 +48,12 @@ const ResidentPage: React.FC = () => {
 
     // Fetch messages when the page loads
     useEffect(() => {
-        fetchMessages();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchMessages(); // ✅ Auto-refresh on navigation back
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     // Toggle Sidebar
     const toggleSidebar = () => {
@@ -149,7 +155,9 @@ const ResidentPage: React.FC = () => {
                 </View>
 
                 <TouchableOpacity onPress={fetchMessages} style={styles.refreshButton}>
-                    <Text style={styles.refreshText}>🔄 Refresh</Text>
+                    <Text style={styles.refreshText}>
+                        {loading ? "⏳ Refreshing..." : "🔄 Refresh"}
+                    </Text>
                 </TouchableOpacity>
 
                 {/* Messages List */}

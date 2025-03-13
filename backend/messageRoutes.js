@@ -63,7 +63,7 @@ router.post('/send-message', async (req, res) => {
         return res.status(400).json({ success: false, message: "Message ID is required for replies." });
     }
 
-    // ✅ Insertion for User Message or Admin Reply
+    // ✅ Step 1: Insert the New Message
     const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, type)
                         VALUES (?, ?, ?, ?, ?, ?);`;
 
@@ -85,7 +85,24 @@ router.post('/send-message', async (req, res) => {
         }
 
         console.log("✅ New Reply Inserted Successfully");
-        res.status(201).json({ success: true, message: "Reply sent successfully." });
+
+        // ✅ Step 2: If it's an admin reply, update the original message status
+        if (type === 'admin' && messageId) {
+            const updateSql = `UPDATE messages SET status = 'Replied' WHERE id = ?`;
+            const updateValues = [messageId];
+
+            db.query(updateSql, updateValues, (updateErr, updateResult) => {
+                if (updateErr) {
+                    console.error("❌ Update Error:", updateErr);
+                    return res.status(500).json({ success: false, message: "Failed to update message status." });
+                }
+
+                console.log("✅ Original Message marked as 'Replied'");
+                return res.status(201).json({ success: true, message: "Reply sent successfully." });
+            });
+        } else {
+            return res.status(201).json({ success: true, message: "Message sent successfully." });
+        }
     });
 });
 
