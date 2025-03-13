@@ -119,4 +119,26 @@ router.get('/get-messages', (req, res) => {
     });
 });
 
+// ✅ GET - Retrieve Messages for NotificationPage.tsx
+router.get('/get-notifications', (req, res) => {
+    const { recipientEmail } = req.query;
+
+    if (!recipientEmail) {
+        return res.status(400).json({ success: false, message: "Recipient email is required." });
+    }
+
+    const sql = `SELECT * FROM messages 
+                 WHERE recipient = ? 
+                 AND sender != ?  -- ✅ Exclude user-sent messages
+                 ORDER BY createdAt DESC`;
+
+    db.query(sql, [recipientEmail, recipientEmail], (err, results) => {
+        if (err) {
+            console.error("❌ Failed to fetch notifications:", err);
+            return res.status(500).json({ success: false, message: "Failed to fetch notifications." });
+        }
+        res.status(200).json(results);
+    });
+});
+
 module.exports = router;

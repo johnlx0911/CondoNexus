@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Icon from "react-native-vector-icons/Feather";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Type definition for dynamic notifications
 type Notification = {
@@ -24,12 +25,23 @@ const NotificationPage = () => {
     // ✅ Fetch Notifications Function
     const fetchNotifications = async () => {
         setIsLoading(true);
+
         try {
-            const response = await fetch("http://192.168.0.109:3000/api/get-messages");
+            const loggedInUserEmail = await AsyncStorage.getItem("userEmail");  // ✅ Retrieve dynamically
+
+            if (!loggedInUserEmail) {
+                Alert.alert("Error", "Failed to retrieve user email.");
+                return;
+            }
+
+            const response = await fetch(
+                `http://192.168.0.109:3000/api/get-notifications?recipientEmail=${loggedInUserEmail}`
+            );
+
             const data: Notification[] = await response.json();
 
             if (Array.isArray(data)) {
-                setNotifications(data);
+                setNotifications(data);  // ✅ Show only admin replies
             } else {
                 Alert.alert("Error", "Failed to load notifications.");
             }
@@ -37,7 +49,7 @@ const NotificationPage = () => {
             console.error("Error fetching notifications:", error);
             Alert.alert("Error", "Something went wrong. Please try again.");
         } finally {
-            setIsLoading(false);  // ✅ Hide Loading Indicator
+            setIsLoading(false);
         }
     };
 
