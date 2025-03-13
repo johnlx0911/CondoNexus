@@ -7,6 +7,7 @@ import { RootStackParamList } from "../../App"; // Import navigation types
 import Icon from "react-native-vector-icons/Feather";
 import { Keyboard, TouchableWithoutFeedback } from "react-native"; // ✅ Import to dismiss keyboard
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 
 const ContactPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -14,35 +15,62 @@ const ContactPage = () => {
     const [message, setMessage] = useState("");
     const [userEmail, setUserEmail] = useState(""); // Store logged-in user's email
 
+    const ADMIN_EMAIL = "leexing0911@gmail.com";
+
     // Fetch logged-in user's email from AsyncStorage
     useEffect(() => {
         const getUserEmail = async () => {
-            const storedEmail = await AsyncStorage.getItem('userEmail');
-            console.log("🟡 Stored Email in AsyncStorage:", storedEmail); // <-- Add this to debug
-            setUserEmail(storedEmail || "Unknown User");
+            try {
+                const storedEmail = await AsyncStorage.getItem('userEmail');
+                console.log("🟡 Stored Email in AsyncStorage:", storedEmail);
+                setUserEmail(storedEmail || "Unknown User");
+            } catch (error) {
+                console.error("❌ Error fetching email:", error);
+                setUserEmail("Unknown User");
+            }
         };
         getUserEmail();
     }, []);
 
+    const [loading, setLoading] = useState(false);
+
     const sendMessage = async () => {
+        const netInfo = await NetInfo.fetch();
+
+        if (!netInfo.isConnected) {
+            Alert.alert("Error", "You are offline. Please connect to the internet and try again.");
+            return;
+        }
+
         if (!subject || !message) {
             Alert.alert("Error", "Please fill in both the subject and message fields.");
             return;
         }
+
+        if (!userEmail || userEmail === "Unknown User") {
+            Alert.alert("Error", "Your email is not detected. Please log in again.");
+            return;
+        }
+
+        setLoading(true); // Start loading
 
         try {
             const response = await fetch("http://192.168.0.109:3000/api/send-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    recipient: "leexing0911@gmail.com",  // ✅ Fixed missing field
+                    recipient: ADMIN_EMAIL,  // ✅ Fixed missing field
                     sender: userEmail,  // Hardcoded for now
                     subject,
                     message,
-                    timestamp: new Date().toISOString(), // ✅ Add timestamp for sorting
                     type: 'user'                  // ✅ Identify this message as a user-sent message
                 }),
             });
+
+
+            if (!response.ok) {
+                throw new Error("Server error. Please try again later.");
+            }
 
             const data = await response.json();
             if (data.success) {
@@ -55,6 +83,8 @@ const ContactPage = () => {
         } catch (error) {
             console.error("Error:", error);
             Alert.alert("Error", "Something went wrong. Please try again.");
+        } finally {
+            setLoading(false); // Stop loading regardless of success or failure
         }
     };
 
@@ -72,10 +102,15 @@ const ContactPage = () => {
 
                 {/* Send Button */}
                 <TouchableOpacity
-                    style={styles.sendButton}
-                    onPress={sendMessage}  // ✅ Added the sendMessage function here
+                    style={[styles.sendButton, (loading || !subject || !message) && { opacity: 0.5 }]}
+                    onPress={sendMessage}
+                    disabled={loading || !subject || !message}
                 >
-                    <Icon name="send" size={24} color="#000" />
+                    {loading ? (
+                        <Text style={{ color: "#000", fontSize: 16 }}>Sending...</Text>
+                    ) : (
+                        <Icon name="send" size={24} color="#000" />
+                    )}
                 </TouchableOpacity>
 
                 {/* Contact Form */}

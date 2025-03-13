@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, FlatList, TextInput, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -19,21 +19,28 @@ const ResidentPage: React.FC = () => {
     const slideAnim = useState(new Animated.Value(-250))[0];
     const [replyMessage, setReplyMessage] = useState("");
     const [residentMessages, setResidentMessages] = useState<Message[]>([]);
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    const [loading, setLoading] = useState(false);
 
     // ✅ Updated fetchMessages to refresh properly
     const fetchMessages = async () => {
+        setLoading(true); // ✅ Start loading state
         try {
             const response = await fetch("http://192.168.0.109:3000/api/get-resident-messages");
             const data: Message[] = await response.json();
 
             if (Array.isArray(data)) {
                 setResidentMessages(data);  // ✅ Show only resident messages
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
             } else {
                 Alert.alert("Error", "Failed to load messages.");
             }
         } catch (error) {
             console.error("Error fetching messages:", error);
             Alert.alert("Error", "Something went wrong. Please try again.");
+        } finally {
+            setLoading(false); // ✅ End loading state
         }
     };
 
@@ -69,7 +76,9 @@ const ResidentPage: React.FC = () => {
     };
 
     // Function to mark message as Read
-    const markAsRead = async (id: number) => {
+    const markAsRead = async (id: number, currentStatus: string) => {
+        if (currentStatus === "Replied") return; // ✅ Skip updating if already "Replied"
+
         try {
             const response = await fetch(`http://192.168.0.109:3000/api/update-status/${id}`, {
                 method: "PUT",
@@ -80,8 +89,6 @@ const ResidentPage: React.FC = () => {
             const data = await response.json();
             if (data.success) {
                 console.log(`✅ Message ${id} marked as 'Read'`);
-
-                // ✅ Directly update the local state to improve UI responsiveness
                 setResidentMessages((prevMessages) =>
                     prevMessages.map((msg) =>
                         msg.id === id ? { ...msg, status: "Read" } : msg
@@ -141,6 +148,10 @@ const ResidentPage: React.FC = () => {
                     <View style={styles.titleLine} />
                 </View>
 
+                <TouchableOpacity onPress={fetchMessages} style={styles.refreshButton}>
+                    <Text style={styles.refreshText}>🔄 Refresh</Text>
+                </TouchableOpacity>
+
                 {/* Messages List */}
                 <FlatList
                     data={residentMessages}
@@ -148,7 +159,7 @@ const ResidentPage: React.FC = () => {
                     renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => {
                             console.log("✅ Navigating to Reply Page");
-                            markAsRead(item.id);  // ✅ Mark as 'Read' when clicked
+                            markAsRead(item.id, item.status);  // ✅ Mark as 'Read' when clicked
                             navigation.navigate("Reply", {
                                 messageId: item.id,     // ✅ Pass `messageId` to ReplyPage.tsx
                                 recipientEmail: item.sender,
@@ -157,7 +168,7 @@ const ResidentPage: React.FC = () => {
                             });
                         }}>
                             <LinearGradient
-                                colors={["#d4af37", "#fff"]}
+                                colors={item.status === "Unread" ? ["#ffcccb", "#fff"] : item.status === "Replied" ? ["#90EE90", "#fff"] : ["#d4af37", "#fff"]}
                                 style={styles.card}
                                 pointerEvents="box-none"
                             >
@@ -365,7 +376,19 @@ const styles = StyleSheet.create({
         marginTop: 5,
         fontWeight: "bold",
         color: "#d4af37",
-    }
+    },
+    refreshButton: {
+        backgroundColor: "#d4af37",
+        padding: 10,
+        borderRadius: 8,
+        alignItems: "center",
+        marginVertical: 10,
+    },
+    refreshText: {
+        color: "#000",
+        fontWeight: "bold",
+        fontSize: 16,
+    },
 });
 
 export default ResidentPage;

@@ -41,70 +41,51 @@ router.get('/get-resident-messages', (req, res) => {
 
 // ✅ POST - Send Message
 router.post('/send-message', async (req, res) => {
-    const { recipient, sender, subject, message, timestamp, type, messageId } = req.body;  // Added `messageId`
+    const { recipient, sender, subject, message, timestamp, type, messageId } = req.body;
 
     console.log("🟠 Received Data:", req.body);
 
-    if (!recipient || !sender || !subject || !message || !type || !messageId) {
+    // 🔍 Check for Missing Fields
+    if (!recipient || !sender || !subject || !message || !type) {
         console.log("❌ Missing fields in request");
         return res.status(400).json({ success: false, message: "All fields are required." });
     }
 
-    const formattedTimestamp = new Date(timestamp || new Date())
-        .toISOString()
-        .slice(0, 19)
-        .replace('T', ' ');
+    // 🔍 Ensure `type` is only 'user' or 'admin'
+    if (type !== 'user' && type !== 'admin') {
+        console.log("❌ Invalid 'type' value:", type);
+        return res.status(400).json({ success: false, message: "Invalid 'type' value." });
+    }
 
-    // ✅ Step 1: Check if this is a reply to an existing message
-    const checkSql = `SELECT * FROM messages WHERE id = ?`;
-    const checkValues = [messageId];
+    // ✅ Only check for `messageId` if it's a reply
+    if (type === 'admin' && !messageId) {
+        console.log("❌ Missing messageId for reply");
+        return res.status(400).json({ success: false, message: "Message ID is required for replies." });
+    }
 
-    db.query(checkSql, checkValues, (checkErr, checkResults) => {
-        if (checkErr) {
-            console.error("❌ Database Error:", checkErr);
-            return res.status(500).json({ success: false, message: "Database error during check." });
+    // ✅ Insertion for User Message or Admin Reply
+    const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, type)
+                        VALUES (?, ?, ?, ?, ?, ?);`;
+
+    const insertValues = [
+        recipient,
+        sender,
+        subject,
+        message,
+        'Unread', // ✅ Status as 'Unread'
+        type       // ✅ Marks this message as either 'user' or 'admin'
+    ];
+
+    console.log("🟡 Inserting message with values:", insertValues);
+
+    db.query(insertSql, insertValues, (insertErr, insertResult) => {
+        if (insertErr) {
+            console.error("❌ Insert Error Details:", insertErr.sqlMessage || insertErr);
+            return res.status(500).json({ success: false, message: insertErr.sqlMessage || "Failed to send reply." });
         }
 
-        if (checkResults.length > 0) {
-            // ✅ Step 2: Update the original message's status to 'Replied'
-            const updateSql = `UPDATE messages SET status = 'Replied' WHERE id = ?`;
-            const updateValues = [checkResults[0].id];
-
-            db.query(updateSql, updateValues, (updateErr, updateResult) => {
-                if (updateErr) {
-                    console.error("❌ Update Error:", updateErr);
-                    return res.status(500).json({ success: false, message: "Failed to update message status." });
-                }
-
-                console.log("✅ Message marked as 'Replied'");
-
-                // ✅ Step 3: Insert a new reply message as 'Unread'
-                const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, createdAt, type) 
-                                   VALUES (?, ?, ?, ?, ?, ?, ?)`;
-
-                const insertValues = [
-                    recipient,
-                    sender,
-                    subject,
-                    message,
-                    'Unread', // ✅ Reply appears as Unread in NotificationPage
-                    formattedTimestamp,
-                    'admin' // ✅ Marks this message as an admin reply
-                ];
-
-                db.query(insertSql, insertValues, (insertErr, insertResult) => {
-                    if (insertErr) {
-                        console.error("❌ Insert Error:", insertErr);
-                        return res.status(500).json({ success: false, message: "Failed to send reply." });
-                    }
-
-                    console.log("✅ New Reply Inserted Successfully");
-                    res.status(201).json({ success: true, message: "Reply sent successfully." });
-                });
-            });
-        } else {
-            return res.status(404).json({ success: false, message: "Original message not found." });
-        }
+        console.log("✅ New Reply Inserted Successfully");
+        res.status(201).json({ success: true, message: "Reply sent successfully." });
     });
 });
 

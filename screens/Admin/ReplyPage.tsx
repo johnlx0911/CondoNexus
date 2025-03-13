@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -9,6 +9,7 @@ import { Keyboard, TouchableWithoutFeedback } from "react-native"; // ✅ Import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { RouteProp, useRoute } from "@react-navigation/native";
+
 // Updated Route Prop Type
 type ReplyPageRouteProp = RouteProp<RootStackParamList, 'Reply'> & {
     params: {
@@ -24,7 +25,7 @@ const ReplyPage = () => {
     const route = useRoute<ReplyPageRouteProp>();  // ✅ Correctly defines route
 
     // Extract messageId in ReplyPage
-    const { messageId } = route.params;
+    const { messageId } = route.params || { messageId: 0 };
 
     const [recipientEmail, setRecipientEmail] = useState(route.params?.recipientEmail || "");
     const [subject, setSubject] = useState(route.params?.subject || "");
@@ -36,27 +37,20 @@ const ReplyPage = () => {
     useEffect(() => {
         const getAdminEmail = async () => {
             const storedAdminEmail = await AsyncStorage.getItem('adminEmail');
-            console.log("🟡 Stored Admin Email in AsyncStorage:", storedAdminEmail); // ✅ Debugging log
-            setUserEmail(storedAdminEmail || "Unknown User"); // ✅ Auto-fill admin's email
+            setUserEmail(storedAdminEmail || "Unknown User");
         };
         getAdminEmail();
-    }, []);
-
-    // Fetch logged-in user's email from AsyncStorage
-    useEffect(() => {
-        const getUserEmail = async () => {
-            const storedUserEmail = await AsyncStorage.getItem('userEmail');
-            console.log("🟢 Stored User Email in AsyncStorage:", storedUserEmail); // ✅ Debugging log
-            setRecipientEmail(storedUserEmail || "Unknown User"); // ✅ Correctly set User's email
-        };
-        getUserEmail();
     }, []);
 
     const [isLoading, setIsLoading] = useState(false); // ✅ Add loading state
 
     const sendMessage = async () => {
-        if (!composeMessage) {
-            Alert.alert("Error", "Please fill in the compose message field.");
+        if (!recipientEmail || !userEmail || !composeMessage) {
+            Alert.alert("Error", "All fields are required.");
+            return;
+        }
+        if (composeMessage.length < 5) {
+            Alert.alert("Error", "Your reply is too short. Please provide a meaningful response.");
             return;
         }
 
@@ -69,25 +63,27 @@ const ReplyPage = () => {
                 body: JSON.stringify({
                     recipient: recipientEmail,  // ✅ To - User's email
                     sender: userEmail,         // ✅ From - Admin's email
-                    subject: subject,          // ✅ Subject auto-filled
+                    subject,          // ✅ Subject auto-filled
                     message: composeMessage,   // ✅ Composed reply
                     timestamp: new Date().toISOString(),  // ✅ Add timestamp for sorting in NotificationPage.tsx
                     type: 'admin',              // ✅ Marks this message as admin-sent
-                    messageId: messageId  // ✅ Add this line to include messageId
+                    messageId
                 }),
             });
 
             const data = await response.json();
+
             if (data.success) {
                 Alert.alert("Success", "Reply sent successfully!");
                 setComposeMessage("");  // ✅ Clear the input field
                 navigation.goBack();    // ✅ Navigate back to ResidentMessagePage.tsx
             } else {
-                Alert.alert("Error", "Failed to send the reply.");
+                throw new Error(data.error || "Failed to send the reply.");
             }
         } catch (error) {
-            console.error("Error:", error);
-            Alert.alert("Error", "Something went wrong. Please try again.");
+            const errorMessage = (error instanceof Error) ? error.message : "An unknown error occurred.";
+            console.error("Error:", errorMessage);
+            Alert.alert("Error", errorMessage);
         } finally {
             setIsLoading(false); // ✅ Hide loading indicator
         }
@@ -107,10 +103,15 @@ const ReplyPage = () => {
 
                 {/* Send Button */}
                 <TouchableOpacity
-                    style={styles.sendButton}
-                    onPress={sendMessage}  // ✅ Added the sendMessage function here
+                    style={[styles.sendButton, isLoading && { opacity: 0.5 }]}
+                    onPress={sendMessage}
+                    disabled={isLoading}
                 >
-                    <Icon name="send" size={24} color="#000" />
+                    {isLoading ? (
+                        <ActivityIndicator size="small" color="#000" />
+                    ) : (
+                        <Icon name="send" size={24} color="#000" />
+                    )}
                 </TouchableOpacity>
 
                 {/* Contact Form */}
