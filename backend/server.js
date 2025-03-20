@@ -1,37 +1,52 @@
 require("dotenv").config();
 console.log("JWT Secret:", process.env.JWT_SECRET);
+
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const db = require("./db"); // Import database connection
+const db = require("./db");
+const cron = require('node-cron');
+const axios = require('axios');
 
 const app = express();
-const authRoutes = require("./authRoutes"); // Import the new routes
-app.use(express.json());
-const PORT = 3000;
-
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
-
-// Message Routes
+const authRoutes = require("./authRoutes");
 const messageRoutes = require('./messageRoutes');
-app.use('/api', messageRoutes);
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+const bookingRoutes = require('./bookingRoutes');
+const generateAvailabilityRoutes = require('./generateAvailability');
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+app.use(express.json());
+const PORT = process.env.PORT || 5000;
 
+// 📌 Error Handling Utility Function
 const handleError = (res, status, message, error = null) => {
     console.error(`❌ ${message}`, error || "");
     res.status(status).json({ message, error });
 };
 
-// Use authentication routes
-app.use("/api", authRoutes);
+// 📌 Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-// Middleware to verify JWT
+// 📌 Routes
+app.use("/api", authRoutes);
+app.use('/api', messageRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/availability', generateAvailabilityRoutes);
+
+// 📌 Schedule task to run every midnight
+cron.schedule('0 0 * * *', async () => {
+    console.log('🔄 Auto-generating availability slots...');
+    try {
+        await axios.post('http://192.168.0.109:5000/api/availability/generate-availability');
+        console.log('✅ Availability slots generated successfully.');
+    } catch (error) {
+        console.error('❌ Failed to generate availability slots:', error.message);
+    }
+});
+
+// 📌 JWT Middleware
 const verifyToken = (req, res, next) => {
     const authHeader = req.header("Authorization");
     console.log("Received Authorization Header:", authHeader); // Debugging
@@ -54,7 +69,9 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-// Create Payment Intent Route
+// 📌 Stripe Integration
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 app.post('/create-payment-intent', async (req, res) => {
     const { amount, currency } = req.body;
 
@@ -149,6 +166,7 @@ app.post("/login", (req, res) => {
     });
 });
 
+// 📌 Profile Route (Protected)
 app.get("/profile", verifyToken, (req, res) => {
     res.json({ message: "Welcome to your profile!", user: req.user });
 });
@@ -190,7 +208,6 @@ app.delete("/reject-resident/:id", (req, res) => {
     });
 });
 
-
 app.get("/residents", (req, res) => {
     const sql = "SELECT * FROM users WHERE status IN ('Pending', 'Approved')";
     db.query(sql, (err, results) => {
@@ -202,6 +219,7 @@ app.get("/residents", (req, res) => {
 });
 
 // 📌 Start Server
-app.listen(5000, () => {
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
     console.log("✅ Server running on port 5000");
 });

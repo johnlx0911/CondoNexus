@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions  } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -9,19 +9,19 @@ import Icon from "react-native-vector-icons/Feather";
 const { height } = Dimensions.get("window"); // Get device height dynamically
 
 const facilities = [
-    { name: "BBQ", icon: "zap" },
-    { name: "Sauna", icon: "sun" },
-    { name: "Ping Pong", icon: "disc" },
-    { name: "Gym", icon: "activity" },
-    { name: "Swimming", icon: "droplet" },
-    { name: "Movie", icon: "film" },
-    { name: "Basketball", icon: "circle" },
-    { name: "Badminton", icon: "wind" },
-    { name: "Tennis", icon: "target" },
-    { name: "Library", icon: "book" },
-    { name: "Cafe", icon: "coffee" },
-    { name: "Co-Working", icon: "briefcase" },
-    { name: "Karaoke", icon: "music" },
+    { id: 1, name: "BBQ", icon: "zap" },
+    { id: 2, name: "Sauna", icon: "sun" },
+    { id: 3, name: "Ping Pong", icon: "disc" },
+    { id: 4, name: "Gym", icon: "activity" },
+    { id: 5, name: "Swimming", icon: "droplet" },
+    { id: 6, name: "Movie", icon: "film" },
+    { id: 7, name: "Basketball", icon: "circle" },
+    { id: 8, name: "Badminton", icon: "wind" },
+    { id: 9, name: "Tennis", icon: "target" },
+    { id: 10, name: "Library", icon: "book" },
+    { id: 11, name: "Cafe", icon: "coffee" },
+    { id: 12, name: "Co-Working", icon: "briefcase" },
+    { id: 13, name: "Karaoke", icon: "music" },
 ];
 
 const FacilityPage = () => {
@@ -65,7 +65,7 @@ const FacilityPage = () => {
                 {filteredFacilities.map((facility, index) => (
                     <TouchableOpacity
                         key={index}
-                        onPress={() => navigation.navigate("Booking", { facility: facility.name })}
+                        onPress={() => navigation.navigate("Booking", { facility })}
                         style={styles.facilityWrapper}
                     >
                         <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.facilityCard}>

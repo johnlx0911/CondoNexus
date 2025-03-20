@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert, ScrollView, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -6,14 +6,17 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 import Icon from "react-native-vector-icons/Feather";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from 'axios';
+import type { FacilityType } from '../../types/types';
 
 const { height } = Dimensions.get("window"); // Get device height dynamically
 
 const BookingPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const route = useRoute();
-    const { facility } = route.params as { facility: string };
+    const { facility } = route.params as { facility: FacilityType };
 
+    const [hasBooking, setHasBooking] = useState(false);
     const [bookingDate, setBookingDate] = useState(new Date());
     const [startTime, setStartTime] = useState<Date | null>(null);
     const [endTime, setEndTime] = useState<Date | null>(null);
@@ -29,6 +32,9 @@ const BookingPage = () => {
         return date ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
     };
 
+    const formatTimeForBackend = (date: Date | null) =>
+        date ? date.toTimeString().split(' ')[0] : null;
+
     const validateTimeRange = (newStartTime: Date | null, newEndTime: Date | null) => {
         if (!newStartTime || !newEndTime) return true;
 
@@ -40,6 +46,36 @@ const BookingPage = () => {
 
         return newEndTime >= minEndTime && newEndTime <= maxEndTime;
     };
+
+    const checkBookingStatus = async () => {
+        try {
+            const response = await axios.get(`http://192.168.0.109:5000/api/bookings/check-booking-status`, {
+                params: {
+                    user_id: 1, // Replace with dynamic user ID
+                    facility_id: facility.id,
+                    booking_date: bookingDate.toISOString().split('T')[0],
+                }
+            });
+
+            setHasBooking(response.data.exists);
+        } catch (error) {
+            console.error("Error checking booking status:", error);
+            Alert.alert("Error", "Failed to check booking status.");
+        }
+    };
+
+    useEffect(() => {
+        checkBookingStatus();
+    }, [facility.id, bookingDate]);
+
+    useEffect(() => {
+        console.log("🔍 Facility Data:", facility);
+
+        if (!facility || !facility.id) {
+            Alert.alert("Error", "Facility data is missing. Please go back and select a facility.");
+            navigation.goBack();
+        }
+    }, []);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -54,7 +90,7 @@ const BookingPage = () => {
 
             <ScrollView
                 contentContainerStyle={styles.gridContainer}
-                style={{ maxHeight: height * 0.71 }} // 🔥 Limits scroll range (Adjustable)
+                style={{ maxHeight: height * 0.55 }} // 🔥 Limits scroll range (Adjustable)
                 showsVerticalScrollIndicator={false}
             >
                 {/* Facility Icon */}
@@ -62,7 +98,7 @@ const BookingPage = () => {
                     <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.facilityContainer}>
                         <Icon name="calendar" size={50} color="#000" />
                     </LinearGradient>
-                    <Text style={styles.facilityName}>{facility}</Text>
+                    <Text style={styles.facilityName}>{facility.name}</Text>
                 </View>
 
                 {/* Booking Details */}
@@ -184,7 +220,7 @@ const BookingPage = () => {
                             style={styles.paxButton}
                             onPress={() => setNumPax((prev) => Math.max(1, prev - 1))}
                         >
-                            <Text style={styles.paxText}>−</Text>
+                            <Text style={styles.paxText}>-</Text>
                         </TouchableOpacity>
                         <Text style={styles.paxText}>{numPax}</Text>
                         <TouchableOpacity
@@ -196,6 +232,71 @@ const BookingPage = () => {
                     </View>
                 </View>
             </ScrollView>
+
+            {/* Buttons Container */}
+            <View style={styles.buttonsContainer}>
+                {/* CONFIRM BOOKING Button */}
+                <TouchableOpacity
+                    style={styles.buttonWrapper}
+                    onPress={async () => {
+
+                        console.log("📤 Payload Data:", {
+                            user_id: 1,  // Ensure this is dynamic in the future
+                            facility_id: facility.id,
+                            booking_date: bookingDate.toISOString().split('T')[0],
+                            start_time: formatTimeForBackend(startTime),
+                            end_time: formatTimeForBackend(endTime),
+                            num_pax: numPax,
+                        });
+
+                        try {
+                            const response = await axios.post('http://192.168.0.109:5000/api/bookings/confirm-booking', {
+                                user_id: 1,  // Replace with dynamic user ID
+                                facility_id: facility.id,
+                                booking_date: bookingDate.toISOString().split('T')[0],
+                                start_time: formatTimeForBackend(startTime),           // HH:mm:ss ✅
+                                end_time: formatTimeForBackend(endTime),               // HH:mm:ss ✅
+                                num_pax: numPax,
+                            }, { timeout: 10000 });
+                            console.log('Facility Data:', facility);
+
+                            Alert.alert("Success", response.data.message);
+                            setHasBooking(true);  // ✅ Mark booking status as true
+                        } catch (error) {
+                            console.error("Error confirming booking:", error);
+                            Alert.alert("Error", "Failed to confirm booking.");
+                        }
+                    }}
+                >
+                    <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.confirmBookButton}>
+                        <Text style={styles.buttonText}>C O N F I R M</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+
+                {/* CANCEL BOOKING Button */}
+                <TouchableOpacity
+                    style={styles.buttonWrapper}
+                    onPress={async () => {
+                        try {
+                            const response = await axios.post('http://192.168.0.109:5000/api/bookings/cancel-booking', {
+                                user_id: 1,  // Replace with dynamic user ID
+                                facility_id: facility.id,
+                                booking_date: bookingDate.toISOString().split('T')[0],
+                            });
+
+                            Alert.alert("Success", response.data.message);
+                            setHasBooking(false);  // ✅ Mark booking status as false
+                        } catch (error) {
+                            console.error("Error canceling booking:", error);
+                            Alert.alert("Error", "Failed to cancel booking.");
+                        }
+                    }}
+                >
+                    <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.cancelButton}>
+                        <Text style={styles.buttonText}>C A N C E L</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
 
             {/* Bottom Navigation */}
             <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
@@ -341,23 +442,45 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
         fontFamily: "Times New Roman",
     },
-    bookNowButton: {
-        width: "85%",
+    buttonWrapper: {
+        width: "85%", // ✅ Ensures the entire button is clickable
         alignSelf: "center",
-        marginTop: 30,
     },
-    bookNowGradient: {
+    buttonsContainer: {
+        position: "absolute",
+        bottom: 130, // ✅ Puts the buttons above the bottom navigation bar
+        width: "100%",
+        alignSelf: "center",
+    },
+    confirmBookButton: {
+        width: "100%",
         paddingVertical: 15,
-        borderRadius: 15,
+        borderRadius: 25,
         alignItems: "center",
         elevation: 5,
-        width: "100%",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        bottom: 10,
     },
-    bookNowText: {
-        fontSize: 20,
+    cancelButton: {
+        width: "100%",
+        marginTop: 10, // ✅ Spacing between the two buttons
+        paddingVertical: 15,
+        borderRadius: 25,
+        alignItems: "center",
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    buttonText: {
+        fontSize: 18,
+        fontFamily: "Times New Roman",
         fontWeight: "bold",
         color: "#000",
-        fontFamily: "Times New Roman",
     },
     bottomNav: {
         position: "absolute",

@@ -7,7 +7,7 @@
 
 // User
 import React, { useEffect } from "react";
-import NfcManager from "react-native-nfc-manager";
+// import NfcManager from "react-native-nfc-manager";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -26,6 +26,8 @@ import BookingPage from "./screens/User/BookingPage";
 import NotificationPage from "./screens/User/NotificationPage";
 import MessagePage from "./screens/User/MessagePage";
 import ContactPage from "./screens/User/ContactPage";
+
+import type { FacilityType } from './types/types';
 // User
 
 import { StripeProvider } from '@stripe/stripe-react-native';
@@ -81,7 +83,7 @@ export type RootStackParamList = {
     TransactionDetails: { transaction: { month: string; amount: number; date: string } };
     CheckOut: undefined;
     Facility: undefined;
-    Booking: { facility: string };
+    Booking: { facility: FacilityType };
     Notification: undefined;
     Message: { message: { sender: string; title: string; body: string; time: string } };
     Contact: undefined;
@@ -142,12 +144,12 @@ function App(): React.JSX.Element {
 
     useEffect(() => {
         // Initialize NFC when app starts
-        NfcManager.start().catch((error) => console.warn("NFC Init Error:", error));
+        // NfcManager.start().catch((error) => console.warn("NFC Init Error:", error));
 
         return () => {
             // Proper cleanup when app closes
-            NfcManager.cancelTechnologyRequest().catch(() => { });
-            NfcManager.unregisterTagEvent().catch(() => { });
+            // NfcManager.cancelTechnologyRequest().catch(() => { });
+            // NfcManager.unregisterTagEvent().catch(() => { });
         };
     }, []);
 
