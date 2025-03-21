@@ -162,7 +162,12 @@ app.post("/login", (req, res) => {
             { expiresIn: "1h" }
         );
 
-        res.status(200).json({ message: "Login successful!", token });
+        // 📌 Return the user's name in the response
+        res.status(200).json({
+            message: "Login successful!",
+            token,
+            name: user.name  // ✅ Include the user's name here
+        });
     });
 });
 

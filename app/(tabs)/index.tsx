@@ -175,11 +175,21 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
       if (response.data.token) {
         await AsyncStorage.setItem("userToken", response.data.token);
         await AsyncStorage.setItem("userEmail", email);     // ✅ Correctly store User Email
+
+        if (response.data.name) {
+          await AsyncStorage.setItem("userName", response.data.name); // ✅ Store user's name
+          console.log("✅ User Name Stored:", response.data.name);
+        } else {
+          console.warn("⚠️ No 'name' found in response. Check server-side logic.");
+        }
+
         if (checked) {
           await AsyncStorage.setItem("rememberedEmail", email);  // ✅ Store email if Remember Me is checked
         } else {
           await AsyncStorage.removeItem("rememberedEmail");      // ✅ Remove if unchecked
         }
+
+        console.log(`✅ User Login Successful: ${email}`);
         navigation.replace("Home");
       } else {
         Alert.alert("Login Failed", response.data.message);

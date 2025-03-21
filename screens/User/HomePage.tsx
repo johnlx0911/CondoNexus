@@ -4,11 +4,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../App"; // Import the navigation types
+import { RootStackParamList } from "../../App";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomePage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [currentDate, setCurrentDate] = useState<string>();
+    const [userName, setUserName] = useState<string | null>(null);
 
     useEffect(() => {
         const today = new Date();
@@ -18,12 +20,27 @@ const HomePage = () => {
             year: "numeric",
         });
         setCurrentDate(formattedDate);
+
+        // ✅ Fetch the stored user's name
+        const fetchUserName = async () => {
+            const name = await AsyncStorage.getItem("userName"); // ✅ Load stored name
+            
+            if (name) {
+                // ✅ Format Name: Uppercase + Spaced-Out Characters
+                const formattedName = name.toUpperCase().split('').join(' ');
+                setUserName(formattedName);
+                console.log("✅ Formatted User Name:", formattedName);
+            }
+        };
+        fetchUserName();
     }, []);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
             {/* Title */}
-            <Text style={styles.title}>J O H N  L E E 's{"\n"}{"\n"}C O N D O  N E X U S</Text>
+            <Text style={styles.title}>
+                {userName ? `${userName}'s\n\nC O N D O  N E X U S` : `C O N D O  N E X U S`}
+            </Text>
 
             {/* Dynamic Date */}
             <View style={styles.dateContainer}>
