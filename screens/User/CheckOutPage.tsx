@@ -49,7 +49,7 @@ const CheckOutPage = () => {
 
     const handlePayment = async () => {
         try {
-            const response = await axios.post('http://localhost:3000/create-payment-intent', {
+            const response = await axios.post('http://localhost:5000/create-payment-intent', {
                 amount: 23452, // Amount in cents (RM234.52)
                 currency: 'myr',
             });

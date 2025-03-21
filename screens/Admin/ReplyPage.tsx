@@ -57,7 +57,7 @@ const ReplyPage = () => {
         setIsLoading(true); // ✅ Show loading during request
 
         try {
-            const response = await fetch("http://192.168.0.109:3000/api/send-message", {
+            const response = await fetch("http://192.168.0.109:5000/api/send-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

@@ -29,7 +29,7 @@ const ResidentPage: React.FC = () => {
         setLoading(true); // ✅ Start loading state
 
         try {
-            const response = await fetch("http://192.168.0.109:3000/api/get-resident-messages");
+            const response = await fetch("http://192.168.0.109:5000/api/get-resident-messages");
             const data: Message[] = await response.json();
 
             if (Array.isArray(data)) {
@@ -86,7 +86,7 @@ const ResidentPage: React.FC = () => {
         if (currentStatus === "Replied") return; // ✅ Skip updating if already "Replied"
 
         try {
-            const response = await fetch(`http://192.168.0.109:3000/api/update-status/${id}`, {
+            const response = await fetch(`http://192.168.0.109:5000/api/update-status/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: "Read" }),

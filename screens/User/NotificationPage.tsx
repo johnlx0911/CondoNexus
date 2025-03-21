@@ -35,7 +35,7 @@ const NotificationPage = () => {
             }
 
             const response = await fetch(
-                `http://192.168.0.109:3000/api/get-notifications?recipientEmail=${loggedInUserEmail}`
+                `http://192.168.0.109:5000/api/get-notifications?recipientEmail=${loggedInUserEmail}`
             );
 
             const data: Notification[] = await response.json();
