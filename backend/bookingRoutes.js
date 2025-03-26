@@ -19,11 +19,12 @@ const isValidTimeFormat = (time) => {
 router.post('/confirm-booking', async (req, res) => {
     const { user_id, facility_id, booking_date, start_time, end_time, num_pax } = req.body;
 
+    const MAX_PAX = 10; // 🔐 Maximum pax per slot
+
     console.log(`📤 Incoming Booking Request:`, req.body);
 
     const today = new Date();
     const bookingDateObj = new Date(booking_date);
-
     const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const bookingDateOnly = new Date(bookingDateObj.getFullYear(), bookingDateObj.getMonth(), bookingDateObj.getDate());
 
@@ -32,13 +33,13 @@ router.post('/confirm-booking', async (req, res) => {
         return res.status(400).json({ message: "Booking failed. Cannot book past dates." });
     }
 
-    // ✅ Database Logic with `.query()`
     db.beginTransaction((err) => {
         if (err) {
             console.error("❌ Transaction Error:", err);
             return res.status(500).json({ message: "Server error. Please try again later." });
         }
 
+        // ✅ Check if facility is closed
         db.query(`
             SELECT * FROM facility_availability
             WHERE facility_id = ? AND date = ? FOR UPDATE
@@ -53,6 +54,7 @@ router.post('/confirm-booking', async (req, res) => {
                 return res.status(400).json({ message: "Facility is closed for maintenance." });
             }
 
+            // ✅ Check if user already has a booking that day
             db.query(`
                 SELECT * FROM bookings
                 WHERE user_id = ? AND facility_id = ? AND booking_date = ?
@@ -67,23 +69,42 @@ router.post('/confirm-booking', async (req, res) => {
                     return res.status(400).json({ message: "You already have a booking for this facility on this date." });
                 }
 
+                // ✅ NEW: Check if time slot has reached MAX_PAX
                 db.query(`
-                    INSERT INTO bookings (user_id, facility_id, booking_date, start_time, end_time, num_pax, status)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
-                `, [user_id, facility_id, booking_date, start_time, end_time, num_pax], (err) => {
+                    SELECT SUM(num_pax) AS total_pax
+                    FROM bookings
+                    WHERE facility_id = ? AND booking_date = ? AND start_time = ? AND status = 'Confirmed'
+                `, [facility_id, booking_date, start_time], (err, results) => {
                     if (err) {
-                        db.rollback(() => console.error("❌ Error Inserting Booking:", err));
+                        db.rollback(() => console.error("❌ Slot Pax Check Failed:", err));
                         return res.status(500).json({ message: "Server error. Please try again later." });
                     }
 
-                    db.commit((err) => {
+                    const totalPax = results[0].total_pax || 0;
+                    if (totalPax + num_pax > MAX_PAX) {
+                        db.rollback(() => console.log("❌ Slot Fully Booked"));
+                        return res.status(400).json({ message: "This time slot is fully booked. Please choose another one." });
+                    }
+
+                    // ✅ Proceed with booking
+                    db.query(`
+                        INSERT INTO bookings (user_id, facility_id, booking_date, start_time, end_time, num_pax, status)
+                        VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
+                    `, [user_id, facility_id, booking_date, start_time, end_time, num_pax], (err) => {
                         if (err) {
-                            db.rollback(() => console.error("❌ Commit Failed:", err));
+                            db.rollback(() => console.error("❌ Error Inserting Booking:", err));
                             return res.status(500).json({ message: "Server error. Please try again later." });
                         }
 
-                        console.log(`✅ Booking confirmed for User ID: ${user_id} on ${booking_date}`);
-                        res.status(201).json({ message: "Booking confirmed successfully." });
+                        db.commit((err) => {
+                            if (err) {
+                                db.rollback(() => console.error("❌ Commit Failed:", err));
+                                return res.status(500).json({ message: "Server error. Please try again later." });
+                            }
+
+                            console.log(`✅ Booking confirmed for User ID: ${user_id} on ${booking_date}`);
+                            res.status(201).json({ message: "Booking confirmed successfully." });
+                        });
                     });
                 });
             });
@@ -147,6 +168,31 @@ router.get('/check-booking-status', async (req, res) => {
         console.error("Error checking booking status:", error);
         res.status(500).json({ message: "Server error. Please try again later." });
     }
+});
+
+// ✅ Get Booking Count Per Time Slot
+router.get('/booking-count', async (req, res) => {
+    const { facility_id, booking_date } = req.query;
+
+    if (!facility_id || !booking_date) {
+        return res.status(400).json({ message: "Missing parameters." });
+    }
+
+    const sql = `
+        SELECT start_time, SUM(num_pax) as total_pax
+        FROM bookings
+        WHERE facility_id = ? AND booking_date = ? AND status = 'Confirmed'
+        GROUP BY start_time
+    `;
+
+    db.query(sql, [facility_id, booking_date], (err, results) => {
+        if (err) {
+            console.error("❌ Error fetching booking counts:", err);
+            return res.status(500).json({ message: "Failed to fetch data" });
+        }
+
+        res.status(200).json(results); // Array of { start_time, total_pax }
+    });
 });
 
 // ✅ Admin Middleware

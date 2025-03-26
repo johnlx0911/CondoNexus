@@ -166,7 +166,8 @@ app.post("/login", (req, res) => {
         res.status(200).json({
             message: "Login successful!",
             token,
-            name: user.name  // ✅ Include the user's name here
+            name: user.name,  // ✅ Include the user's name here
+            id: user.id  // ✅ Add this if not already included
         });
     });
 });

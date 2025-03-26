@@ -176,6 +176,12 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
         await AsyncStorage.setItem("userToken", response.data.token);
         await AsyncStorage.setItem("userEmail", email);     // ✅ Correctly store User Email
 
+        if (response.data.id) {
+          await AsyncStorage.setItem("userId", response.data.id.toString());  // ✅ Save userId
+        } else {
+          console.warn("⚠️ No 'id' in login response.");
+        }
+
         if (response.data.name) {
           await AsyncStorage.setItem("userName", response.data.name); // ✅ Store user's name
           console.log("✅ User Name Stored:", response.data.name);

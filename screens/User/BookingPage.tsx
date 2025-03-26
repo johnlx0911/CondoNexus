@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/Feather";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from 'axios';
 import type { FacilityType } from '../../types/types';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window"); // Get device height dynamically
 
@@ -28,30 +29,99 @@ const BookingPage = () => {
     const [tempStartTime, setTempStartTime] = useState<Date | null>(null);
     const [tempEndTime, setTempEndTime] = useState<Date | null>(null);
 
+    const [userId, setUserId] = useState<number | null>(null);
+    const [bookedSlots, setBookedSlots] = useState<{ [key: string]: number }>({});
+    const [fullyBookedRanges, setFullyBookedRanges] = useState<{ start: string; end: string }[]>([]);
+
+    const MAX_PAX = 10;
+
+    const isSlotFull = (time: Date) => {
+        const checkTime = time.toTimeString().slice(0, 5); // "18:00"
+        for (let range of fullyBookedRanges) {
+            if (checkTime >= range.start && checkTime < range.end) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const fetchSlotCounts = async () => {
+        try {
+            const response = await axios.get('http://192.168.0.109:5000/api/bookings/booking-count', {
+                params: {
+                    facility_id: facility.id,
+                    booking_date: bookingDate.toISOString().split('T')[0],
+                },
+            });
+
+            const slotMap: { [key: string]: number } = {};
+            const fullRanges: { start: string; end: string }[] = [];
+
+            response.data.forEach((entry: any) => {
+                const start = entry.start_time; // already "HH:mm"
+                const end = entry.end_time;     // already "HH:mm"
+
+                if (start) {
+                    slotMap[start] = entry.total_pax;
+                }
+
+                if (start && end && entry.total_pax >= MAX_PAX) {
+                    fullRanges.push({ start, end });
+                }
+            });
+
+            setBookedSlots(slotMap);
+            setFullyBookedRanges(fullRanges);
+        } catch (error) {
+            console.error("Failed to fetch slot counts:", error);
+        }
+    };
+
     const formatTime = (date: Date | null) => {
         return date ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
     };
 
     const formatTimeForBackend = (date: Date | null) =>
-        date ? date.toTimeString().split(' ')[0] : null;
+        date ? date.toTimeString().slice(0, 5) : null;  // 👈 Only HH:mm
+
+    const normalizeTime = (date: Date) => {
+        const normalized = new Date(date);
+        normalized.setSeconds(0);
+        normalized.setMilliseconds(0);
+        return normalized;
+    };
+
+    const isToday = (date: Date) => {
+        const now = new Date();
+        return (
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+        );
+    };
 
     const validateTimeRange = (newStartTime: Date | null, newEndTime: Date | null) => {
         if (!newStartTime || !newEndTime) return true;
 
-        const minEndTime = new Date(newStartTime);
-        minEndTime.setHours(minEndTime.getHours() + 1); // Min 1 hour booking
+        const normalizedStart = normalizeTime(newStartTime);
+        const normalizedEnd = normalizeTime(newEndTime);
 
-        const maxEndTime = new Date(newStartTime);
-        maxEndTime.setHours(maxEndTime.getHours() + 4); // Max 4 hours booking
+        const minEndTime = new Date(normalizedStart);
+        minEndTime.setHours(minEndTime.getHours() + 1);
 
-        return newEndTime >= minEndTime && newEndTime <= maxEndTime;
+        const maxEndTime = new Date(normalizedStart);
+        maxEndTime.setHours(maxEndTime.getHours() + 4);
+
+        return normalizedEnd >= minEndTime && normalizedEnd <= maxEndTime;
     };
 
     const checkBookingStatus = async () => {
+        if (!userId) return Alert.alert("Error", "User ID not found.");
+
         try {
             const response = await axios.get(`http://192.168.0.109:5000/api/bookings/check-booking-status`, {
                 params: {
-                    user_id: 1, // Replace with dynamic user ID
+                    user_id: userId, // Replace with dynamic user ID
                     facility_id: facility.id,
                     booking_date: bookingDate.toISOString().split('T')[0],
                 }
@@ -65,8 +135,10 @@ const BookingPage = () => {
     };
 
     useEffect(() => {
-        checkBookingStatus();
-    }, [facility.id, bookingDate]);
+        if (userId !== null) {
+            checkBookingStatus();
+        }
+    }, [userId, facility.id, bookingDate]);
 
     useEffect(() => {
         console.log("🔍 Facility Data:", facility);
@@ -76,6 +148,18 @@ const BookingPage = () => {
             navigation.goBack();
         }
     }, []);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const id = await AsyncStorage.getItem("userId");
+            setUserId(id ? parseInt(id) : null);
+        };
+        fetchUserId();
+    }, []);
+
+    useEffect(() => {
+        if (userId) fetchSlotCounts();
+    }, [bookingDate, facility.id, userId]);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -159,6 +243,7 @@ const BookingPage = () => {
                                 value={tempStartTime || new Date()}
                                 mode="time"
                                 display="spinner"
+                                minimumDate={isToday(bookingDate) ? new Date() : undefined} // ⛔️ Disable past times today
                                 onChange={(event, selectedTime) => {
                                     if (selectedTime) setTempStartTime(selectedTime);
                                 }}
@@ -170,7 +255,11 @@ const BookingPage = () => {
                                             "Invalid Start Time",
                                             "The start time must be at least 1 hour before and at most 4 hours before the end time."
                                         );
-                                    } else {
+                                    } else if (tempStartTime && isSlotFull(tempStartTime)) {
+                                        Alert.alert("Fully Booked", "This time slot is fully booked. Please choose another one.");
+                                        return;
+                                    }
+                                    else {
                                         setStartTime(tempStartTime);
                                         setShowStartPicker(false);
                                     }
@@ -189,6 +278,7 @@ const BookingPage = () => {
                                 value={tempEndTime || new Date()}
                                 mode="time"
                                 display="spinner"
+                                minimumDate={isToday(bookingDate) ? new Date() : undefined}
                                 onChange={(event, selectedTime) => {
                                     if (selectedTime) setTempEndTime(selectedTime);
                                 }}
@@ -200,7 +290,11 @@ const BookingPage = () => {
                                             "Invalid End Time",
                                             "The end time must be at least 1 hour after and at most 4 hours after the start time."
                                         );
-                                    } else {
+                                    } else if (tempEndTime && isSlotFull(tempEndTime)) {
+                                        Alert.alert("Fully Booked", "This time slot is fully booked. Please choose another one.");
+                                        return;
+                                    }
+                                    else {
                                         setEndTime(tempEndTime);
                                         setShowEndPicker(false);
                                     }
@@ -239,6 +333,7 @@ const BookingPage = () => {
                 <TouchableOpacity
                     style={styles.buttonWrapper}
                     onPress={async () => {
+                        if (!userId) return Alert.alert("Error", "User ID not found.");
 
                         console.log("📤 Payload Data:", {
                             user_id: 1,  // Ensure this is dynamic in the future
@@ -251,7 +346,7 @@ const BookingPage = () => {
 
                         try {
                             const response = await axios.post('http://192.168.0.109:5000/api/bookings/confirm-booking', {
-                                user_id: 1,  // Replace with dynamic user ID
+                                user_id: userId,
                                 facility_id: facility.id,
                                 booking_date: bookingDate.toISOString().split('T')[0],
                                 start_time: formatTimeForBackend(startTime),           // HH:mm:ss ✅
@@ -277,9 +372,11 @@ const BookingPage = () => {
                 <TouchableOpacity
                     style={styles.buttonWrapper}
                     onPress={async () => {
+                        if (!userId) return Alert.alert("Error", "User ID not found.");
+
                         try {
                             const response = await axios.post('http://192.168.0.109:5000/api/bookings/cancel-booking', {
-                                user_id: 1,  // Replace with dynamic user ID
+                                user_id: userId,
                                 facility_id: facility.id,
                                 booking_date: bookingDate.toISOString().split('T')[0],
                             });
