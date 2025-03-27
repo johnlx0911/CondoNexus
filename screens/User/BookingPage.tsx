@@ -361,9 +361,13 @@ const BookingPage = () => {
 
                             Alert.alert("Success", response.data.message);
                             setHasBooking(true);
-                        } catch (error) {
+                        } catch (error: any) {
                             console.error("Error confirming booking:", error);
-                            Alert.alert("Error", "Failed to confirm booking.");
+
+                            const message =
+                                error.response?.data?.message || "Failed to confirm booking. Please try again later.";
+
+                            Alert.alert("Booking Failed", message);
                         }
                     }}
                 >
