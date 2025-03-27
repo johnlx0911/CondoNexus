@@ -334,29 +334,33 @@ const BookingPage = () => {
                     style={styles.buttonWrapper}
                     onPress={async () => {
                         if (!userId) return Alert.alert("Error", "User ID not found.");
+                        if (!startTime || !endTime) return Alert.alert("Missing Time", "Please select both start and end times.");
 
-                        console.log("📤 Payload Data:", {
-                            user_id: 1,  // Ensure this is dynamic in the future
-                            facility_id: facility.id,
-                            booking_date: bookingDate.toISOString().split('T')[0],
-                            start_time: formatTimeForBackend(startTime),
-                            end_time: formatTimeForBackend(endTime),
-                            num_pax: numPax,
+                        const newStart = formatTimeForBackend(startTime) || "";
+                        const newEnd = formatTimeForBackend(endTime) || "";
+
+                        // ⛔️ Check for overlap with fully booked time ranges
+                        const isOverlap = fullyBookedRanges.some((range) => {
+                            return newStart < range.end && newEnd > range.start;
                         });
+
+                        if (isOverlap) {
+                            Alert.alert("Time Conflict", "Your selected time overlaps with a fully booked slot.");
+                            return;
+                        }
 
                         try {
                             const response = await axios.post('http://192.168.0.109:5000/api/bookings/confirm-booking', {
                                 user_id: userId,
                                 facility_id: facility.id,
                                 booking_date: bookingDate.toISOString().split('T')[0],
-                                start_time: formatTimeForBackend(startTime),           // HH:mm:ss ✅
-                                end_time: formatTimeForBackend(endTime),               // HH:mm:ss ✅
+                                start_time: newStart,  // Convert to "HH:mm:ss"
+                                end_time: newEnd,
                                 num_pax: numPax,
                             }, { timeout: 10000 });
-                            console.log('Facility Data:', facility);
 
                             Alert.alert("Success", response.data.message);
-                            setHasBooking(true);  // ✅ Mark booking status as true
+                            setHasBooking(true);
                         } catch (error) {
                             console.error("Error confirming booking:", error);
                             Alert.alert("Error", "Failed to confirm booking.");

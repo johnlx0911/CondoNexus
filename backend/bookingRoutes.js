@@ -69,41 +69,69 @@ router.post('/confirm-booking', async (req, res) => {
                     return res.status(400).json({ message: "You already have a booking for this facility on this date." });
                 }
 
-                // ✅ NEW: Check if time slot has reached MAX_PAX
+                // ✅ NEW: Check for overlapping fully booked slots
                 db.query(`
-                    SELECT SUM(num_pax) AS total_pax
+                    SELECT start_time, end_time
                     FROM bookings
-                    WHERE facility_id = ? AND booking_date = ? AND start_time = ? AND status = 'Confirmed'
-                `, [facility_id, booking_date, start_time], (err, results) => {
+                    WHERE facility_id = ? AND booking_date = ? AND status = 'Confirmed'
+                    GROUP BY start_time, end_time
+                    HAVING SUM(num_pax) >= ?
+                `, [facility_id, booking_date, MAX_PAX], (err, fullyBooked) => {
                     if (err) {
-                        db.rollback(() => console.error("❌ Slot Pax Check Failed:", err));
+                        db.rollback(() => console.error("❌ Overlap Check Failed:", err));
                         return res.status(500).json({ message: "Server error. Please try again later." });
                     }
 
-                    const totalPax = results[0].total_pax || 0;
-                    if (totalPax + num_pax > MAX_PAX) {
-                        db.rollback(() => console.log("❌ Slot Fully Booked"));
-                        return res.status(400).json({ message: "This time slot is fully booked. Please choose another one." });
+                    const requestedStart = parseFloat(start_time.slice(0, 5).replace(":", "."));
+                    const requestedEnd = parseFloat(end_time.slice(0, 5).replace(":", "."));
+
+                    for (let slot of fullyBooked) {
+                        const bookedStart = parseFloat(slot.start_time.slice(0, 5).replace(":", "."));
+                        const bookedEnd = parseFloat(slot.end_time.slice(0, 5).replace(":", "."));
+
+                        // ⛔️ If time ranges overlap, block the booking
+                        if (requestedStart < bookedEnd && requestedEnd > bookedStart) {
+                            db.rollback(() => console.log("❌ Overlapping Fully Booked Slot"));
+                            return res.status(400).json({ message: "Time range overlaps with a fully booked slot." });
+                        }
                     }
 
-                    // ✅ Proceed with booking
+                    // ✅ Check if exact start_time is already full
                     db.query(`
-                        INSERT INTO bookings (user_id, facility_id, booking_date, start_time, end_time, num_pax, status)
-                        VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
-                    `, [user_id, facility_id, booking_date, start_time, end_time, num_pax], (err) => {
+                        SELECT SUM(num_pax) AS total_pax
+                        FROM bookings
+                        WHERE facility_id = ? AND booking_date = ? AND start_time = ? AND status = 'Confirmed'
+                    `, [facility_id, booking_date, start_time], (err, results) => {
                         if (err) {
-                            db.rollback(() => console.error("❌ Error Inserting Booking:", err));
+                            db.rollback(() => console.error("❌ Slot Pax Check Failed:", err));
                             return res.status(500).json({ message: "Server error. Please try again later." });
                         }
 
-                        db.commit((err) => {
+                        const totalPax = results[0].total_pax || 0;
+                        if (totalPax + num_pax > MAX_PAX) {
+                            db.rollback(() => console.log("❌ Slot Fully Booked"));
+                            return res.status(400).json({ message: "This time slot is fully booked. Please choose another one." });
+                        }
+
+                        // ✅ Proceed with booking
+                        db.query(`
+                            INSERT INTO bookings (user_id, facility_id, booking_date, start_time, end_time, num_pax, status)
+                            VALUES (?, ?, ?, ?, ?, ?, 'Confirmed')
+                        `, [user_id, facility_id, booking_date, start_time, end_time, num_pax], (err) => {
                             if (err) {
-                                db.rollback(() => console.error("❌ Commit Failed:", err));
+                                db.rollback(() => console.error("❌ Error Inserting Booking:", err));
                                 return res.status(500).json({ message: "Server error. Please try again later." });
                             }
 
-                            console.log(`✅ Booking confirmed for User ID: ${user_id} on ${booking_date}`);
-                            res.status(201).json({ message: "Booking confirmed successfully." });
+                            db.commit((err) => {
+                                if (err) {
+                                    db.rollback(() => console.error("❌ Commit Failed:", err));
+                                    return res.status(500).json({ message: "Server error. Please try again later." });
+                                }
+
+                                console.log(`✅ Booking confirmed for User ID: ${user_id} on ${booking_date}`);
+                                res.status(201).json({ message: "Booking confirmed successfully." });
+                            });
                         });
                     });
                 });
