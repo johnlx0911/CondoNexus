@@ -62,7 +62,8 @@ const MemberPage = () => {
                 </LinearGradient>
             </TouchableOpacity>
 
-            <Modal transparent
+            <Modal
+                transparent
                 visible={inviteModalVisible}
                 animationType="fade"
                 onRequestClose={() => setInviteModalVisible(false)}
@@ -70,7 +71,7 @@ const MemberPage = () => {
                 <TouchableOpacity
                     style={styles.modalContainer}
                     activeOpacity={1}
-                    onPressOut={() => setInviteModalVisible(false)}
+                    onPressOut={() => setInviteModalVisible(false)} // 🔥 Tapping outside closes modal
                 >
                     <View style={styles.modalContentWrapper}>
                         <TouchableWithoutFeedback>

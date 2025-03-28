@@ -53,31 +53,46 @@ const NotificationPage = () => {
         }
     };
 
-    // ✅ Auto-fetch notifications when page loads
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
+    const handleInvitation = async (messageId: number, senderEmail: string, action: "accept" | "reject") => {
+        const userEmail = await AsyncStorage.getItem("userEmail");
+        if (!userEmail) return Alert.alert("Error", "Your email is not available.");
 
-    // ✅ Improved Notification Handling Function
-    const handleNotificationPress = (item: Notification) => {
-        const formatDate = (dateString: string) => {
-            return new Date(dateString).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-        };
+        if (action === "accept") {
+            try {
+                const response = await fetch("http://192.168.0.109:5000/api/add-member", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userEmail,         // this user (recipient)
+                        senderEmail        // the inviter
+                    }),
+                });
 
-        // Display message details directly in an alert
-        Alert.alert(
-            item.subject,
-            `${item.message}\n\n🕒 ${formatDate(item.createdAt)}`,
-            [{ text: "OK" }]
-        );
+                const data = await response.json();
+                if (data.success) {
+                    Alert.alert("Success", "You are now connected!");
+                    fetchNotifications(); // refresh the list
+                } else {
+                    Alert.alert("Error", data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                Alert.alert("Error", "Something went wrong.");
+            }
+        } else {
+            // Reject logic (just delete the message or mark as read)
+            try {
+                await fetch(`http://192.168.0.109:5000/api/update-status/${messageId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: "Rejected" }),
+                });
+                fetchNotifications(); // refresh
+            } catch (err) {
+                console.error(err);
+            }
+        }
     };
-
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -108,11 +123,7 @@ const NotificationPage = () => {
                 ) : (
                     <ScrollView contentContainerStyle={styles.notificationList}>
                         {notifications.map((item) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                style={styles.notificationItem}
-                                onPress={() => handleNotificationPress(item)}
-                            >
+                            <View key={item.id} style={styles.notificationItem}>
                                 <View style={styles.notificationContent}>
                                     <Image
                                         source={require("../../assets/profile-icon.png")}
@@ -123,8 +134,27 @@ const NotificationPage = () => {
                                         <Text style={styles.notificationText}>{item.subject}</Text>
                                     </View>
                                 </View>
-                                <Icon name="chevron-right" size={20} color="#fff" />
-                            </TouchableOpacity>
+
+                                {/* 👉 Conditional Buttons for Membership Invitation */}
+                                {item.subject === "Membership Invitation" ? (
+                                    <View style={{ flexDirection: "row" }}>
+                                        <TouchableOpacity
+                                            style={styles.actionButton}
+                                            onPress={() => handleInvitation(item.id, item.sender, "accept")}
+                                        >
+                                            <Text style={styles.actionButtonText}>Accept</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[styles.actionButton, { backgroundColor: "#c0392b" }]}
+                                            onPress={() => handleInvitation(item.id, item.sender, "reject")}
+                                        >
+                                            <Text style={styles.actionButtonText}>Reject</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                ) : (
+                                    <Icon name="chevron-right" size={20} color="#fff" />
+                                )}
+                            </View>
                         ))}
                     </ScrollView>
                 )}
@@ -297,6 +327,18 @@ const styles = StyleSheet.create({
     navText: {
         color: "#000",
         fontSize: 16,
+    },
+    actionButton: {
+        backgroundColor: "#27ae60",
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginHorizontal: 3,
+    },
+    actionButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 14,
     },
 });
 

@@ -141,4 +141,115 @@ router.get('/get-notifications', (req, res) => {
     });
 });
 
+router.post("/add-member", async (req, res) => {
+    const { senderEmail, userEmail } = req.body;
+
+    if (!senderEmail || !userEmail) {
+        return res.status(400).json({ success: false, message: "Both emails are required." });
+    }
+
+    try {
+        const getUsersSql = `SELECT id, email FROM users WHERE email IN (?, ?)`;
+        db.query(getUsersSql, [senderEmail, userEmail], (err, users) => {
+            if (err) {
+                console.error("❌ Error fetching user IDs:", err);
+                return res.status(500).json({ success: false, message: "Server error." });
+            }
+
+            if (users.length !== 2) {
+                return res.status(404).json({ success: false, message: "One or both users not found." });
+            }
+
+            const sender = users.find(u => u.email === senderEmail);
+            const recipient = users.find(u => u.email === userEmail);
+
+            const insertSql = `
+                INSERT IGNORE INTO user_members (user_id, member_id)
+                VALUES (?, ?), (?, ?)
+            `;
+
+            db.query(insertSql, [sender.id, recipient.id, recipient.id, sender.id], (insertErr) => {
+                if (insertErr) {
+                    console.error("❌ Error inserting member:", insertErr);
+                    return res.status(500).json({ success: false, message: "Failed to add members." });
+                }
+
+                return res.status(200).json({ success: true, message: "Members connected successfully." });
+            });
+        });
+    } catch (error) {
+        console.error("❌ Unexpected error:", error);
+        res.status(500).json({ success: false, message: "Internal server error." });
+    }
+});
+
+router.get("/get-members", (req, res) => {
+    const { email } = req.query;
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    // Get user ID by email
+    const getUserSql = `SELECT id FROM users WHERE email = ?`;
+    db.query(getUserSql, [email], (err, userResult) => {
+        if (err || userResult.length === 0) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        const userId = userResult[0].id;
+
+        // Now get member details
+        const getMembersSql = `
+            SELECT u.name, u.email FROM user_members um
+            JOIN users u ON um.member_id = u.id
+            WHERE um.user_id = ?
+        `;
+
+        db.query(getMembersSql, [userId], (err, members) => {
+            if (err) {
+                console.error("❌ Failed to fetch members:", err);
+                return res.status(500).json({ success: false, message: "Server error." });
+            }
+
+            res.status(200).json(members);
+        });
+    });
+});
+
+// ✅ Accept Invitation & Add to user_members
+router.post('/accept-invite', async (req, res) => {
+    const { sender, recipient } = req.body;
+
+    if (!sender || !recipient) {
+        return res.status(400).json({ success: false, message: "Sender and recipient emails are required." });
+    }
+
+    try {
+        // Step 1: Get both users
+        const [senderResult] = await db.query(`SELECT id FROM users WHERE email = ?`, [sender]);
+        const [recipientResult] = await db.query(`SELECT id FROM users WHERE email = ?`, [recipient]);
+
+        if (!senderResult || !recipientResult) {
+            return res.status(404).json({ success: false, message: "User(s) not found." });
+        }
+
+        const senderId = senderResult.id;
+        const recipientId = recipientResult.id;
+
+        // Step 2: Insert both directions into user_members
+        const insertSql = `
+            INSERT IGNORE INTO user_members (user_id, member_id)
+            VALUES (?, ?), (?, ?)
+        `;
+
+        await db.query(insertSql, [senderId, recipientId, recipientId, senderId]);
+
+        return res.status(200).json({ success: true, message: "Members connected successfully." });
+    } catch (err) {
+        console.error("❌ Error accepting invite:", err);
+        return res.status(500).json({ success: false, message: "Server error. Please try again later." });
+    }
+});
+
 module.exports = router;
