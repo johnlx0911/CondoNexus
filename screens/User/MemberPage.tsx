@@ -11,7 +11,7 @@ const MemberPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
     // Define members state
-    const [members, setMembers] = useState<{ name: string; email: string }[]>([]);
+    const [members, setMembers] = useState<{ name: string; email: string; mobile: string }[]>([]);
 
     const [inviteModalVisible, setInviteModalVisible] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
@@ -58,7 +58,7 @@ const MemberPage = () => {
                     <TouchableOpacity
                         key={index}
                         style={styles.memberCard}
-                        onPress={() => navigation.navigate("EditMember")}
+                        onPress={() => navigation.navigate("EditMember", { member })}
                     >
                         <View style={styles.memberContent}>
                             <Image source={require("../../assets/profile-icon.png")} style={styles.memberImage} />

@@ -1,13 +1,17 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
 import Icon from "react-native-vector-icons/Feather";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EditMemberPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const route = useRoute<RouteProp<RootStackParamList, "EditMember">>();
+    const member = route.params.member;
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -27,15 +31,46 @@ const EditMemberPage = () => {
 
             {/* Input Fields */}
             <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email or Phone Number</Text>
-                <TextInput style={styles.input} placeholderTextColor="#ffffff99" />
+                <Text style={styles.label}>Email</Text>
+                <TextInput style={styles.input} value={member.email || ""} editable={false} placeholderTextColor="#ffffff99" />
+
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput style={styles.input} value={member.mobile || ""} editable={false} placeholderTextColor="#ffffff99" />
 
                 <Text style={styles.label}>Username</Text>
-                <TextInput style={styles.input} placeholderTextColor="#ffffff99" />
+                <TextInput style={styles.input} value={member.name || ""} editable={false} placeholderTextColor="#ffffff99" />
             </View>
 
-            {/* Invite Button with Gradient Background */}
-            <TouchableOpacity style={styles.inviteButton}>
+            {/* Delete Button with Gradient Background */}
+            <TouchableOpacity
+                style={styles.inviteButton}
+                onPress={async () => {
+                    const currentUserEmail = await AsyncStorage.getItem("userEmail");
+                    if (!currentUserEmail) return Alert.alert("Error", "User email not found.");
+
+                    try {
+                        const res = await fetch("http://192.168.0.109:5000/api/delete-member", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                userEmail: currentUserEmail,
+                                memberEmail: member.email,
+                            }),
+                        });
+
+                        const result = await res.json();
+                        if (result.success) {
+                            Alert.alert("Deleted", "Member has been removed.");
+                            navigation.goBack();
+                        } else {
+                            Alert.alert("Error", result.message);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        Alert.alert("Error", "Failed to delete member.");
+                    }
+                }}
+            >
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.inviteGradient}>
                     <Text style={styles.inviteText}>D E L E T E</Text>
                 </LinearGradient>
@@ -127,7 +162,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     inviteButton: {
-        marginTop: 120, // ✅ Adjusted for spacing
+        marginTop: 45, // ✅ Adjusted for spacing
         alignSelf: "center",
         width: "85%",
     },

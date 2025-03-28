@@ -202,7 +202,7 @@ router.get("/get-members", (req, res) => {
 
         // Now get member details
         const getMembersSql = `
-            SELECT u.name, u.email FROM user_members um
+            SELECT u.name, u.email, u.mobile FROM user_members um
             JOIN users u ON um.member_id = u.id
             WHERE um.user_id = ?
         `;
@@ -251,6 +251,39 @@ router.post('/accept-invite', async (req, res) => {
         console.error("❌ Error accepting invite:", err);
         return res.status(500).json({ success: false, message: "Server error. Please try again later." });
     }
+});
+
+router.post("/delete-member", (req, res) => {
+    const { userEmail, memberEmail } = req.body;
+
+    if (!userEmail || !memberEmail) {
+        return res.status(400).json({ success: false, message: "Emails are required." });
+    }
+
+    const getIdsSql = `SELECT id, email FROM users WHERE email IN (?, ?)`;
+    db.query(getIdsSql, [userEmail, memberEmail], (err, users) => {
+        if (err || users.length !== 2) {
+            return res.status(404).json({ success: false, message: "User(s) not found." });
+        }
+
+        const userId = users.find(u => u.email === userEmail).id;
+        const memberId = users.find(u => u.email === memberEmail).id;
+
+        const deleteSql = `
+            DELETE FROM user_members
+            WHERE (user_id = ? AND member_id = ?)
+               OR (user_id = ? AND member_id = ?)
+        `;
+
+        db.query(deleteSql, [userId, memberId, memberId, userId], (deleteErr) => {
+            if (deleteErr) {
+                console.error("❌ Delete member error:", deleteErr);
+                return res.status(500).json({ success: false, message: "Failed to remove member." });
+            }
+
+            return res.status(200).json({ success: true, message: "Member removed successfully." });
+        });
+    });
 });
 
 module.exports = router;

@@ -46,7 +46,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Access: undefined;
   Member: undefined;
-  EditMember: undefined;
+  EditMember: { member: { name: string; email: string; mobile: string } };
   Payment: undefined;
   Transaction: undefined;
   TransactionDetails: { transaction: { month: string; amount: number; date: string } };
