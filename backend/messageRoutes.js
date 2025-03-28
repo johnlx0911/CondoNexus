@@ -78,30 +78,42 @@ router.post('/send-message', async (req, res) => {
                 const senderId = senderUser.id;
                 const recipientId = recipientUser.id;
 
-                // Check if they are already members
-                const checkMembersSql = `SELECT * FROM user_members WHERE user_id = ? AND member_id = ?`;
-                db.query(checkMembersSql, [senderId, recipientId], (memberErr, memberResult) => {
-                    if (memberErr) {
-                        return res.status(500).json({ success: false, message: "Error checking member status." });
+                // 🔢 Step 1: Check if sender already has 8 members
+                const checkMemberCountSql = `SELECT COUNT(*) AS total FROM user_members WHERE user_id = ?`;
+                db.query(checkMemberCountSql, [senderId], (countErr, countResult) => {
+                    if (countErr) {
+                        return res.status(500).json({ success: false, message: "Error checking member count." });
                     }
 
-                    if (memberResult.length > 0) {
-                        return res.status(400).json({ success: false, message: "You are already members." });
+                    const memberCount = countResult[0].total;
+                    if (memberCount >= 8) {
+                        return res.status(400).json({ success: false, message: "You've reached the maximum number of members (8)." });
                     }
 
-                    // Check for existing invitation
-                    const checkInviteSql = `SELECT * FROM messages WHERE sender = ? AND recipient = ? AND subject = ? AND status = 'Unread'`;
-                    db.query(checkInviteSql, [sender, recipient, 'Membership Invitation'], (inviteErr, inviteResult) => {
-                        if (inviteErr) {
-                            return res.status(500).json({ success: false, message: "Error checking existing invitation." });
+                    // 🔁 Proceed with existing checks
+                    const checkMembersSql = `SELECT * FROM user_members WHERE user_id = ? AND member_id = ?`;
+                    db.query(checkMembersSql, [senderId, recipientId], (memberErr, memberResult) => {
+                        if (memberErr) {
+                            return res.status(500).json({ success: false, message: "Error checking member status." });
                         }
 
-                        if (inviteResult.length > 0) {
-                            return res.status(400).json({ success: false, message: "Invitation already sent and pending." });
+                        if (memberResult.length > 0) {
+                            return res.status(400).json({ success: false, message: "You are already members." });
                         }
 
-                        // Proceed to next section (insert message)
-                        proceedToInsert();
+                        const checkInviteSql = `SELECT * FROM messages WHERE sender = ? AND recipient = ? AND subject = ? AND status = 'Unread'`;
+                        db.query(checkInviteSql, [sender, recipient, 'Membership Invitation'], (inviteErr, inviteResult) => {
+                            if (inviteErr) {
+                                return res.status(500).json({ success: false, message: "Error checking existing invitation." });
+                            }
+
+                            if (inviteResult.length > 0) {
+                                return res.status(400).json({ success: false, message: "Invitation already sent and pending." });
+                            }
+
+                            // ✅ Proceed to insert
+                            proceedToInsert();
+                        });
                     });
                 });
             });
