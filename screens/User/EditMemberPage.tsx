@@ -72,7 +72,7 @@ const EditMemberPage = () => {
                 }}
             >
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.inviteGradient}>
-                    <Text style={styles.inviteText}>D E L E T E</Text>
+                    <Text style={styles.inviteText}>R E M O V E  M E M B E R</Text>
                 </LinearGradient>
             </TouchableOpacity>
 

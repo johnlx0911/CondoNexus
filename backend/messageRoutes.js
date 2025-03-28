@@ -63,6 +63,73 @@ router.post('/send-message', async (req, res) => {
         return res.status(400).json({ success: false, message: "Message ID is required for replies." });
     }
 
+    // 🛡️ Step 0: Prevent Duplicate Invitation Logic
+    if (subject === 'Membership Invitation') {
+        try {
+            const getUsersSql = `SELECT id, email FROM users WHERE email IN (?, ?)`;
+            db.query(getUsersSql, [sender, recipient], (err, users) => {
+                if (err || users.length !== 2) {
+                    return res.status(404).json({ success: false, message: "User(s) not found." });
+                }
+
+                const senderUser = users.find(u => u.email === sender);
+                const recipientUser = users.find(u => u.email === recipient);
+
+                const senderId = senderUser.id;
+                const recipientId = recipientUser.id;
+
+                // Check if they are already members
+                const checkMembersSql = `SELECT * FROM user_members WHERE user_id = ? AND member_id = ?`;
+                db.query(checkMembersSql, [senderId, recipientId], (memberErr, memberResult) => {
+                    if (memberErr) {
+                        return res.status(500).json({ success: false, message: "Error checking member status." });
+                    }
+
+                    if (memberResult.length > 0) {
+                        return res.status(400).json({ success: false, message: "You are already members." });
+                    }
+
+                    // Check for existing invitation
+                    const checkInviteSql = `SELECT * FROM messages WHERE sender = ? AND recipient = ? AND subject = ? AND status = 'Unread'`;
+                    db.query(checkInviteSql, [sender, recipient, 'Membership Invitation'], (inviteErr, inviteResult) => {
+                        if (inviteErr) {
+                            return res.status(500).json({ success: false, message: "Error checking existing invitation." });
+                        }
+
+                        if (inviteResult.length > 0) {
+                            return res.status(400).json({ success: false, message: "Invitation already sent and pending." });
+                        }
+
+                        // Proceed to next section (insert message)
+                        proceedToInsert();
+                    });
+                });
+            });
+
+            // Wrap the insert logic here so it's only called after all checks pass
+            function proceedToInsert() {
+                const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, type)
+                                    VALUES (?, ?, ?, ?, ?, ?)`;
+                const insertValues = [recipient, sender, subject, message, 'Unread', type];
+
+                db.query(insertSql, insertValues, (insertErr, insertResult) => {
+                    if (insertErr) {
+                        return res.status(500).json({ success: false, message: "Failed to send invitation." });
+                    }
+
+                    return res.status(201).json({ success: true, message: "Membership invitation sent successfully." });
+                });
+            }
+
+            // Prevent duplicate insert outside the callback chain
+            return;
+
+        } catch (err) {
+            console.error("❌ Error checking existing invitation:", err);
+            return res.status(500).json({ success: false, message: "Server error during invitation check." });
+        }
+    }
+
     // ✅ Step 1: Insert the New Message
     const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, type)
                         VALUES (?, ?, ?, ?, ?, ?);`;
