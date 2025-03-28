@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image, Alert, TextInput, Modal, TouchableWithoutFeedback } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
 import Icon from "react-native-vector-icons/Feather";
@@ -11,16 +11,35 @@ const MemberPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
     // Define members state
-    const [members, setMembers] = useState([
-        { name: "John Lee Xing", email: "leexing0911@gmail.com" },
-        { name: "Varsyathini Paramasawam", email: "varsya@gmail.com" },
-        { name: "Leong Ee Mun", email: "eemun@gmail.com" },
-        { name: "Jack", email: "jack@gmail.com" },
-        { name: "Gabriel Yee", email: "gabriel@gmail.com" },
-    ]);
+    const [members, setMembers] = useState<{ name: string; email: string }[]>([]);
 
     const [inviteModalVisible, setInviteModalVisible] = useState(false);
     const [inviteEmail, setInviteEmail] = useState("");
+
+    const fetchMembers = async () => {
+        try {
+            const userEmail = await AsyncStorage.getItem("userEmail");
+            if (!userEmail) return;
+
+            const res = await fetch(`http://192.168.0.109:5000/api/get-members?email=${userEmail}`);
+            const data = await res.json();
+
+            if (Array.isArray(data)) {
+                setMembers(data); // [{ name, email }]
+            } else {
+                Alert.alert("Error", "Failed to fetch members.");
+            }
+        } catch (err) {
+            console.error("Error fetching members:", err);
+            Alert.alert("Error", "Unable to load members.");
+        }
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchMembers();
+        }, [])
+    );
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>

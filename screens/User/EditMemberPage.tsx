@@ -37,7 +37,7 @@ const EditMemberPage = () => {
             {/* Invite Button with Gradient Background */}
             <TouchableOpacity style={styles.inviteButton}>
                 <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.inviteGradient}>
-                    <Text style={styles.inviteText}>I N V I T E</Text>
+                    <Text style={styles.inviteText}>D E L E T E</Text>
                 </LinearGradient>
             </TouchableOpacity>
 

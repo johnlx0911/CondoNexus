@@ -130,6 +130,7 @@ router.get('/get-notifications', (req, res) => {
     const sql = `SELECT * FROM messages 
                  WHERE recipient = ? 
                  AND sender != ?  -- ✅ Exclude user-sent messages
+                 AND status NOT IN ('Accepted', 'Rejected')  -- ✅ Exclude already handled invites
                  ORDER BY createdAt DESC`;
 
     db.query(sql, [recipientEmail, recipientEmail], (err, results) => {

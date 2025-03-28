@@ -59,19 +59,28 @@ const NotificationPage = () => {
 
         if (action === "accept") {
             try {
+                // Step 1: Add to member list
                 const response = await fetch("http://192.168.0.109:5000/api/add-member", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        userEmail,         // this user (recipient)
-                        senderEmail        // the inviter
+                        userEmail,
+                        senderEmail
                     }),
                 });
 
                 const data = await response.json();
+
                 if (data.success) {
+                    // Step 2: Update message status to 'Accepted'
+                    await fetch(`http://192.168.0.109:5000/api/update-status/${messageId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: "Accepted" }),
+                    });
+
                     Alert.alert("Success", "You are now connected!");
-                    fetchNotifications(); // refresh the list
+                    fetchNotifications();
                 } else {
                     Alert.alert("Error", data.message);
                 }
