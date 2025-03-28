@@ -146,20 +146,32 @@ const NotificationPage = () => {
 
                                 {/* 👉 Conditional Buttons for Membership Invitation */}
                                 {item.subject === "Membership Invitation" ? (
-                                    <View style={{ flexDirection: "row" }}>
-                                        <TouchableOpacity
-                                            style={styles.actionButton}
-                                            onPress={() => handleInvitation(item.id, item.sender, "accept")}
-                                        >
-                                            <Text style={styles.actionButtonText}>Accept</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={[styles.actionButton, { backgroundColor: "#c0392b" }]}
-                                            onPress={() => handleInvitation(item.id, item.sender, "reject")}
-                                        >
-                                            <Text style={styles.actionButtonText}>Reject</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                                    <>
+                                        {item.status === "Unread" ? (
+                                            <View style={{ flexDirection: "row" }}>
+                                                <TouchableOpacity
+                                                    style={styles.actionButton}
+                                                    onPress={() => handleInvitation(item.id, item.sender, "accept")}
+                                                >
+                                                    <Text style={styles.actionButtonText}>Accept</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    style={[styles.actionButton, { backgroundColor: "#c0392b" }]}
+                                                    onPress={() => handleInvitation(item.id, item.sender, "reject")}
+                                                >
+                                                    <Text style={styles.actionButtonText}>Reject</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ) : item.status === "Accepted" ? (
+                                            <Text style={{ color: "#2ecc71", fontWeight: "bold" }}>
+                                                You are now connected with {item.sender}
+                                            </Text>
+                                        ) : item.status === "Rejected" ? (
+                                            <Text style={{ color: "#e74c3c", fontWeight: "bold" }}>
+                                                You rejected the invitation from {item.sender}
+                                            </Text>
+                                        ) : null}
+                                    </>
                                 ) : (
                                     <Icon name="chevron-right" size={20} color="#fff" />
                                 )}
