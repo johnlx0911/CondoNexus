@@ -117,11 +117,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -146,10 +145,9 @@ const styles = StyleSheet.create({
         resizeMode: "contain",
     },
     accessText: {
-        fontSize: 25,
-        fontFamily: "Times New Roman",
+        fontSize: 27,
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
-        fontWeight: "bold",
         marginTop: 10,
     },
     bottomNav: {
@@ -173,9 +171,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

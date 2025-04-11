@@ -52,7 +52,8 @@ const PaymentPage = () => {
 
             {/* Page Title */}
             <Text style={styles.title}>P A Y M E N T</Text>
-            <View style={styles.titleLine} /> {/* ✅ New line below the title */}
+            {/* ✅ New line below the title */}
+            <View style={styles.titleLine} />
 
             {/* Amount */}
             <Text style={styles.amount}>RM234.52</Text>
@@ -126,11 +127,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -143,9 +143,8 @@ const styles = StyleSheet.create({
         borderRadius: 2, // ✅ Smooth edges
     },
     amount: {
-        fontSize: 45,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 47,
+        fontFamily: "TimesNewRoman",
         color: "#fff",
         textAlign: "left", // ✅ Align text to left
         alignSelf: "flex-start", // ✅ Move to the left side
@@ -155,7 +154,7 @@ const styles = StyleSheet.create({
     },
     dueDate: {
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#fff",
         textAlign: "left", // ✅ Align text to left
         alignSelf: "flex-start", // ✅ Move to the left side
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
     },
     warning: {
         fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
         textAlign: "left", // ✅ Align text to left
         alignSelf: "flex-start", // ✅ Move to the left side
@@ -182,15 +181,14 @@ const styles = StyleSheet.create({
     feeLabel: {
         fontSize: 22,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1, // Ensures equal spacing
         textAlign: "left",
     },
     feeAmount: {
-        fontSize: 22,
+        fontSize: 24,
         color: "#d4af37",
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         width: 100,
         textAlign: "left",
         marginRight: 30,
@@ -230,9 +228,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
     },
     buttonText: {
-        fontSize: 18,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     bottomNav: {
@@ -256,9 +253,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

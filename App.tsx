@@ -6,9 +6,10 @@
  */
 
 // User
-import React, { useEffect } from "react";
+import React, { useEffect, useState, PropsWithChildren } from "react";
+import * as Font from 'expo-font';
 // import NfcManager from "react-native-nfc-manager";
-import { View } from "react-native";
+import { View, Text, TextInput, StyleSheet, useColorScheme, } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import SignUpPage from "./screens/User/SignUpPage";
@@ -30,11 +31,6 @@ import ContactPage from "./screens/User/ContactPage";
 import type { FacilityType } from './types/types';
 // User
 
-import { StripeProvider } from '@stripe/stripe-react-native';
-import Constants from 'expo-constants';
-// Correct key extraction to handle undefined/null values
-const STRIPE_PUBLISHABLE_KEY = Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY;
-
 // Admin
 import DashboardPage from "./screens/Admin/DashboardPage";
 import FacilityManagementPage from "./screens/Admin/FacilityManagementPage";
@@ -46,23 +42,7 @@ import AnnouncementPage from "./screens/Admin/AnnouncementPage";
 import ReplyPage from "./screens/Admin/ReplyPage";
 // Admin
 
-import type { PropsWithChildren } from 'react';
-import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    useColorScheme,
-} from 'react-native';
-
-import {
-    Colors,
-    DebugInstructions,
-    Header,
-    LearnMoreLinks,
-    ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 type SectionProps = PropsWithChildren<{
     title: string;
@@ -80,7 +60,7 @@ export type RootStackParamList = {
     EditMember: { member: { name: string; email: string; mobile: string } };
     Payment: undefined;
     Transaction: undefined;
-    TransactionDetails: { transaction: { month: string; amount: number; date: string } };
+    TransactionDetails: { transaction: { month: string; amount: number; date_paid: string } };
     CheckOut: undefined;
     Facility: undefined;
     Booking: { facility: FacilityType };
@@ -137,10 +117,41 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
     const isDarkMode = useColorScheme() === 'dark';
+    const [fontsLoaded, setFontsLoaded] = useState(false);
 
     const backgroundStyle = {
         backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     };
+
+    useEffect(() => {
+        Font.loadAsync({
+            'TimesNewRoman': require('./assets/fonts/TimesNewRoman.ttf'),
+        }).then(() => {
+            setFontsLoaded(true);
+
+            // ✅ GLOBAL DEFAULT FONT OVERRIDE FOR <Text>
+            const TextAny = Text as any;
+            const oldTextRender = TextAny.render;
+            TextAny.render = function (...args: any[]) {
+                const origin = oldTextRender.call(this, ...args);
+                if (!origin) return null;
+                return React.cloneElement(origin, {
+                    style: [{ fontFamily: 'TimesNewRoman' }, origin.props.style],
+                });
+            };
+
+            // ✅ GLOBAL DEFAULT FONT FOR <TextInput>
+            const TextInputAny = TextInput as any;
+            const oldInputRender = TextInputAny.render;
+            TextInputAny.render = function (...args: any[]) {
+                const origin = oldInputRender.call(this, ...args);
+                if (!origin) return null;
+                return React.cloneElement(origin, {
+                    style: [{ fontFamily: 'TimesNewRoman' }, origin.props.style],
+                });
+            };
+        });
+    }, []);
 
     useEffect(() => {
         // Initialize NFC when app starts
@@ -154,42 +165,38 @@ function App(): React.JSX.Element {
     }, []);
 
     return (
-        <StripeProvider
-            publishableKey={Constants.expoConfig?.extra?.STRIPE_PUBLISHABLE_KEY || ""}
-        >
-            <NavigationContainer>
-                <Stack.Navigator initialRouteName="Login">
-                    {/* User */}
-                    <Stack.Screen name="Signup" component={SignUpPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Access" component={AccessPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Member" component={MemberPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="EditMember" component={EditMemberPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Payment" component={PaymentPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Transaction" component={TransactionPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="TransactionDetails" component={TransactionDetailsPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="CheckOut" component={CheckOutPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Facility" component={FacilityPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Booking" component={BookingPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Notification" component={NotificationPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Message" component={MessagePage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Contact" component={ContactPage} options={{ headerShown: false }} />
-                    {/* User */}
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName="Login">
+                {/* User */}
+                <Stack.Screen name="Signup" component={SignUpPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                <Stack.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }} />
+                <Stack.Screen name="Access" component={AccessPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Member" component={MemberPage} options={{ headerShown: false }} />
+                <Stack.Screen name="EditMember" component={EditMemberPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Payment" component={PaymentPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Transaction" component={TransactionPage} options={{ headerShown: false }} />
+                <Stack.Screen name="TransactionDetails" component={TransactionDetailsPage} options={{ headerShown: false }} />
+                <Stack.Screen name="CheckOut" component={CheckOutPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Facility" component={FacilityPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Booking" component={BookingPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Notification" component={NotificationPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Message" component={MessagePage} options={{ headerShown: false }} />
+                <Stack.Screen name="Contact" component={ContactPage} options={{ headerShown: false }} />
+                {/* User */}
 
-                    {/* Admin */}
-                    <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
-                    <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
-                    <Stack.Screen name="Reply" component={ReplyPage} options={{ headerShown: false }} />
-                    {/* Admin */}
-                </Stack.Navigator>
-            </NavigationContainer>
-        </StripeProvider>
+                {/* Admin */}
+                <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
+                <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
+                <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
+                <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
+                <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Announcement" component={AnnouncementPage} options={{ headerShown: false }} />
+                <Stack.Screen name="Reply" component={ReplyPage} options={{ headerShown: false }} />
+                {/* Admin */}
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 

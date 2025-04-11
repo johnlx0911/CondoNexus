@@ -163,11 +163,11 @@ const NotificationPage = () => {
                                                 </TouchableOpacity>
                                             </View>
                                         ) : item.status === "Accepted" ? (
-                                            <Text style={{ color: "#2ecc71", fontWeight: "bold" }}>
+                                            <Text style={{ color: "#2ecc71" }}>
                                                 You are now connected with {item.sender}
                                             </Text>
                                         ) : item.status === "Rejected" ? (
-                                            <Text style={{ color: "#e74c3c", fontWeight: "bold" }}>
+                                            <Text style={{ color: "#e74c3c" }}>
                                                 You rejected the invitation from {item.sender}
                                             </Text>
                                         ) : null}
@@ -226,11 +226,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -266,7 +265,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         marginTop: 10,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     notificationList: {
         paddingBottom: 10,
@@ -295,8 +294,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     senderName: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 20,
         color: "#d4af37",
     },
     notificationText: {
@@ -326,9 +324,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
     },
     contactText: {
-        fontSize: 18,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     bottomNav: {
@@ -358,8 +355,7 @@ const styles = StyleSheet.create({
     },
     actionButtonText: {
         color: "#fff",
-        fontWeight: "bold",
-        fontSize: 14,
+        fontSize: 16,
     },
 });
 

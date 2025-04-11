@@ -182,11 +182,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -225,15 +224,14 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     memberName: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 20,
         color: "#d4af37",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     memberEmail: {
         fontSize: 16,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     bottomNav: {
         position: "absolute",
@@ -256,9 +254,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
     buttonWrapper: {
         width: "85%", // ✅ Ensures the entire button is clickable
@@ -297,9 +294,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
     },
     buttonText: {
-        fontSize: 18,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     modalContainer: {
@@ -316,10 +312,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     label: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 20,
         marginBottom: 10,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     inputField: {
@@ -331,7 +326,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         width: "100%",
         fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     modalContentWrapper: {

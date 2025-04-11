@@ -113,11 +113,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -147,7 +146,7 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     gridContainer: {
@@ -172,12 +171,11 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     facilityText: {
-        fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
         color: "#000",
         marginTop: 5,
         textAlign: "center",
-        fontWeight: "bold",
     },
     bottomNav: {
         position: "absolute",
@@ -196,9 +194,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

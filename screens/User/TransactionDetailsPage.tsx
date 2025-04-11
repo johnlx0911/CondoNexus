@@ -90,11 +90,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -111,25 +110,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 35,
     },
     transactionMonth: {
-        fontSize: 45,
-        fontWeight: "bold",
+        fontSize: 47,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "left",
         marginTop: 70,
     },
     transactionAmount: {
-        fontSize: 45,
-        fontWeight: "bold",
+        fontSize: 47,
         color: "#d4af37",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginTop: 8,
         textAlign: "left",
     },
     transactionDate: {
         fontSize: 20,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginTop: 10,
         textAlign: "left",
         marginBottom: 20,
@@ -142,15 +139,14 @@ const styles = StyleSheet.create({
     feeText: {
         fontSize: 22,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1,  // ✅ Makes sure all fee names take equal space
         textAlign: "left",  // ✅ Aligns text to left
     },
     feeAmount: {
-        fontSize: 22,
+        fontSize: 24,
         color: "#d4af37",
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         width: 100,  // ✅ Ensures all amounts align correctly
         textAlign: "left",  // ✅ Aligns amounts in the same column
         marginRight: 30,
@@ -176,9 +172,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

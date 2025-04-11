@@ -192,11 +192,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -223,32 +222,32 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         color: "#A0A0A0",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         width: 70, // ✅ Keep spacing for "To", "From", "Subject"
     },
     composeLabel: {
         fontSize: 16,
         color: "#A0A0A0",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         width: 140, // ✅ Increased width for "Compose Message" so it stays in one line
         marginBottom: 10,
     },
     boldText: {
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1,
     },
     normalText: {
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1,
     },
     inputField: {
         fontSize: 16,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1,
         textAlign: "left",
         paddingVertical: 5,
@@ -256,7 +255,7 @@ const styles = StyleSheet.create({
     messageField: {
         fontSize: 16,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1, // ✅ Makes the input expand properly
         textAlignVertical: "top", // ✅ Keeps text input aligned properly
         minHeight: 100, // ✅ Prevents input field from collapsing
@@ -299,9 +298,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

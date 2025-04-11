@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
 import Icon from "react-native-vector-icons/Feather";
-import { useStripe } from '@stripe/stripe-react-native';
 import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const QRImage = require("../../assets/images/qr.jpg");
 
 const CheckOutPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-    const { confirmPayment } = useStripe();
 
     const [dueDate, setDueDate] = useState<string>("");
     const [daysRemaining, setDaysRemaining] = useState<number>(0);
@@ -47,25 +48,23 @@ const CheckOutPage = () => {
         setIsModalVisible(false); // Close modal after selection
     };
 
-    const handlePayment = async () => {
+    const handleTngPayment = async () => {
+        const userId = await AsyncStorage.getItem("userId"); // 👈 if you're storing userId
+        const today = new Date();
+        const payload = {
+            user_id: parseInt(userId ?? "0"),
+            month: "April",
+            amount: 234.52,
+            date_paid: today.toISOString().split("T")[0], // format: YYYY-MM-DD
+            payment_method: "TnG",
+        };
+
         try {
-            const response = await axios.post('http://localhost:5000/create-payment-intent', {
-                amount: 23452, // Amount in cents (RM234.52)
-                currency: 'myr',
-            });
-
-            const { clientSecret } = response.data;
-            const { error, paymentIntent } = await confirmPayment(clientSecret, {
-                paymentMethodType: "Card",
-            });
-
-            if (error) {
-                alert(`Payment failed: ${error.message}`);
-            } else if (paymentIntent) {
-                alert(`Payment successful! ID: ${paymentIntent.id}`);
-            }
+            await axios.post("http://192.168.0.109:5000/api/transactions/addTransaction", payload);
+            setSelectedPaymentMethod("");
+            navigation.navigate("Transaction");
         } catch (error) {
-            alert("Failed to initiate payment. Please try again.");
+            console.error("Payment failed", error);
         }
     };
 
@@ -123,7 +122,11 @@ const CheckOutPage = () => {
                 visible={isModalVisible}
                 onRequestClose={() => setIsModalVisible(false)}
             >
-                <View style={styles.modalBackground}>
+                <TouchableOpacity
+                    style={styles.modalBackground}
+                    activeOpacity={1}
+                    onPressOut={() => setSelectedPaymentMethod("")}
+                >
                     <View style={styles.modalContainer}>
                         <Text style={styles.modalTitle}>Select Payment Method</Text>
                         <TouchableOpacity onPress={() => handlePaymentMethodSelect("Card")} style={styles.modalOption}>
@@ -144,15 +147,34 @@ const CheckOutPage = () => {
                             <Text style={styles.modalCloseText}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Modal>
 
-            {/* Confirm Payment */}
-            <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
-                <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.confirmGradient}>
-                    <Text style={styles.confirmText}>P A Y  N O W</Text>
-                </LinearGradient>
-            </TouchableOpacity>
+            {/* TnG Payment QR Modal */}
+            {selectedPaymentMethod === "TnG" && (
+                <Modal
+                    transparent={true}
+                    animationType="slide"
+                    visible={true}
+                    onRequestClose={() => setSelectedPaymentMethod("")}
+                >
+                    <View style={styles.modalBackground}>
+                        <View style={styles.qrModalContainer}>
+                            <Text style={styles.modalTitle}>Pay with Touch 'n Go</Text>
+                            <Text style={styles.receiverText}>Receiver: JOHN LEE XING</Text>
+                            <Text style={styles.amountText}>Amount: RM234.52</Text>
+                            <Image source={QRImage} style={styles.qrImage} />
+
+                            <TouchableOpacity
+                                style={styles.modalCloseButton}
+                                onPress={handleTngPayment} // <-- ✅ use the actual function to send to DB
+                            >
+                                <Text style={styles.modalCloseText}>I've Paid</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+            )}
 
             {/* Bottom Navigation */}
             <LinearGradient colors={["#e6c78e", "#b88b4a"]} style={styles.bottomNav}>
@@ -188,11 +210,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -208,10 +229,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 35,
     },
     amount: {
-        fontSize: 45,
-        fontWeight: "bold",
+        fontSize: 47,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "left",
         marginTop: 60,
         marginBottom: 5,
@@ -219,14 +239,14 @@ const styles = StyleSheet.create({
     dueDate: {
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "left",
         marginTop: 5,
     },
     warning: {
         fontSize: 16,
         color: "#d4af37",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "left",
         marginTop: 5,
         marginBottom: 20,
@@ -239,15 +259,14 @@ const styles = StyleSheet.create({
     feeText: {
         fontSize: 22,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         flex: 1,
         textAlign: "left",
     },
     feeAmount: {
-        fontSize: 22,
+        fontSize: 24,
         color: "#d4af37",
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         width: 100,
         textAlign: "left",
         marginRight: 30,
@@ -265,34 +284,15 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     paymentMethodText: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 20,
         color: "#000",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     paymentType: {
         fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000",
         marginTop: 5,
-    },
-    confirmButton: {
-        width: "85%",
-        alignSelf: "center",
-        marginTop: 15,
-    },
-    confirmGradient: {
-        paddingVertical: 15,
-        borderRadius: 25,
-        alignItems: "center",
-        elevation: 5,
-        width: "100%",
-    },
-    confirmText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#000",
-        fontFamily: "Times New Roman",
     },
     bottomNav: {
         position: "absolute",
@@ -311,9 +311,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 
     // Modal Styles
@@ -330,9 +329,8 @@ const styles = StyleSheet.create({
         borderRadius: 20
     },
     modalTitle: {
-        fontSize: 22,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 24,
+        fontFamily: "TimesNewRoman",
         textAlign: "center",
         marginBottom: 20
     },
@@ -343,20 +341,46 @@ const styles = StyleSheet.create({
     },
     modalOptionText: {
         fontSize: 20,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "center"
     },
     modalCloseButton: {
         marginTop: 15,
         paddingVertical: 10,
+        paddingHorizontal: 10,
         backgroundColor: "#b88b4a",
         borderRadius: 10
     },
     modalCloseText: {
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "center",
         color: "#fff"
+    },
+    qrModalContainer: {
+        width: "85%",
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 20,
+        alignItems: "center",
+    },
+    qrImage: {
+        width: 220,
+        height: 220,
+        marginVertical: 20,
+        borderRadius: 10,
+    },
+    receiverText: {
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
+        color: "#000",
+        marginBottom: 10,
+    },
+    amountText: {
+        fontSize: 22,
+        fontFamily: "TimesNewRoman",
+        color: "#b88b4a",
+        marginBottom: 5,
     },
 });
 

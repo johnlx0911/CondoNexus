@@ -153,11 +153,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -181,9 +180,8 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     sidebarTitle: {
-        fontSize: 22,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 24,
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
         marginBottom: 10,
         marginTop: 60,
@@ -196,7 +194,7 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         fontSize: 13,
     },
     logoutItem: {
@@ -226,14 +224,12 @@ const styles = StyleSheet.create({
         zIndex: 15,
     },
     menuText: {
-        fontSize: 26,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 28,
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
     },
     heading: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#fff",
         textAlign: "center",
     },
@@ -251,17 +247,15 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     cardTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontSize: 22,
+        fontFamily: "TimesNewRoman",
     },
     cardText: {
         fontSize: 18,
         color: "#444",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
-    bold: {   // ✅ THIS FIXES THE ERROR
-        fontWeight: "bold",
+    bold: {
     },
     button: {
         marginTop: 10,
@@ -273,9 +267,8 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "#000",
-        fontSize: 18,
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
     },
     green: { backgroundColor: "green" },
     orange: { backgroundColor: "orange" },

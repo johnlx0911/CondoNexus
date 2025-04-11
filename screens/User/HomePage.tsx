@@ -24,7 +24,7 @@ const HomePage = () => {
         // ✅ Fetch the stored user's name
         const fetchUserName = async () => {
             const name = await AsyncStorage.getItem("userName"); // ✅ Load stored name
-            
+
             if (name) {
                 // ✅ Format Name: Uppercase + Spaced-Out Characters
                 const formattedName = name.toUpperCase().split('').join(' ');
@@ -121,19 +121,17 @@ const styles = StyleSheet.create({
     },
     title: {
         color: "#d4af37",
-        fontSize: 24,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 26,
+        fontFamily: "TimesNewRoman",
         textAlign: "center",
         marginTop: 50,
         marginBottom: 50,
     },
     date: {
         color: "#d4af37",
-        fontSize: 18,
+        fontSize: 20,
         marginVertical: 10,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontFamily: "TimesNewRoman",
         textAlign: "center",
     },
     dateContainer: {
@@ -178,9 +176,8 @@ const styles = StyleSheet.create({
     },
     iconText: {
         marginTop: 8, // Space between icon and text
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
         color: "#000",
         textAlign: "center",
     },
@@ -205,9 +202,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

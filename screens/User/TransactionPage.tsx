@@ -1,22 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App"; // Import the navigation types
 import Icon from "react-native-vector-icons/Feather";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const transactions = [
-    { month: "November", amount: 250, date: "29 November" },
-    { month: "August", amount: 300, date: "29 August" },
-    { month: "July", amount: 150, date: "29 July" },
-    { month: "June", amount: 220, date: "29 June" },
-    { month: "May", amount: 250, date: "29 May" },
-    { month: "April", amount: 290, date: "29 April" },
-];
+type Transaction = {
+    month: string;
+    amount: number;
+    date_paid: string;
+};
 
 const TransactionPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                const userId = await AsyncStorage.getItem("userId");
+                const response = await axios.get(`http://192.168.0.109:5000/api/transactions/getTransactions/${userId}`);
+                setTransactions(response.data);
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            }
+        };
+
+        fetchTransactions();
+    }, []);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
@@ -41,7 +55,7 @@ const TransactionPage = () => {
                                 <Text style={styles.transactionMonth}>2024 {item.month}</Text>
                                 <View style={styles.amountRow}>
                                     <Text style={styles.transactionAmount}>RM{item.amount}</Text>
-                                    <Text style={styles.transactionDate}>Paid {item.date}</Text>
+                                    <Text style={styles.transactionDate}>Paid {item.date_paid}</Text>
                                 </View>
                             </View>
                             <Icon name="chevron-right" size={22} color="#d4af37" />
@@ -85,13 +99,12 @@ const styles = StyleSheet.create({
         left: 35,
         marginTop: 30,
         zIndex: 10, // ✅ Ensures it's above everything
-    },    
+    },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -134,10 +147,9 @@ const styles = StyleSheet.create({
         flex: 1, // Allows text to take up max width
     },
     transactionMonth: {
-        fontSize: 25,
-        fontWeight: "bold",
+        fontSize: 27,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     amountRow: {
         flexDirection: "row",
@@ -146,16 +158,15 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     transactionAmount: {
-        fontSize: 18,
+        fontSize: 20,
         color: "#d4af37",
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     transactionDate: {
         fontSize: 16,
         color: "#fff",
         marginLeft: 10, // ✅ Moves it slightly right of amount
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     bottomNav: {
         position: "absolute",
@@ -178,9 +189,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

@@ -234,11 +234,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -262,9 +261,8 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     sidebarTitle: {
-        fontSize: 22,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 24,
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
         marginBottom: 10,
         marginTop: 60,
@@ -277,7 +275,7 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         fontSize: 13,
     },
     logoutItem: {
@@ -307,15 +305,13 @@ const styles = StyleSheet.create({
         zIndex: 15,
     },
     menuText: {
-        fontSize: 26,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 28,
+        fontFamily: "TimesNewRoman",
         color: "#d4af37",
     },
     heading: {
-        fontSize: 26,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 28,
+        fontFamily: "TimesNewRoman",
         color: "#fff",
         textAlign: "center",
         marginBottom: 20,
@@ -328,13 +324,12 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     cardTitle: {
-        fontSize: 20,
-        fontFamily: "Times New ROman",
-        fontWeight: "bold",
+        fontSize: 22,
+        fontFamily: "TimesNewRoman",
     },
     cardText: {
         fontSize: 18,
-        fontFamily: "Times New ROman",
+        fontFamily: "TimesNewRoman",
         color: "#444",
     },
     input: {
@@ -359,16 +354,14 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: "#fff",
-        fontSize: 18,
-        fontFamily: "Times New ROman",
-        fontWeight: "bold",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
     },
     green: { backgroundColor: "green" },
     blue: { backgroundColor: "blue" },
     red: { backgroundColor: "red" },
     subject: {
-        fontWeight: "bold",
-        fontSize: 18,
+        fontSize: 20,
         color: "#000",
         marginBottom: 5,
     },
@@ -382,7 +375,6 @@ const styles = StyleSheet.create({
     },
     status: {
         marginTop: 5,
-        fontWeight: "bold",
         color: "#d4af37",
     },
     refreshButton: {
@@ -394,8 +386,7 @@ const styles = StyleSheet.create({
     },
     refreshText: {
         color: "#000",
-        fontWeight: "bold",
-        fontSize: 16,
+        fontSize: 18,
     },
 });
 

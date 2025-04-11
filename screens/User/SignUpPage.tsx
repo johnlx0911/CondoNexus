@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     label: {
         color: "#fff",
         fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 5,
         marginTop: 10
     },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#fff",
         paddingVertical: 15,
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#fff"
     },
     passwordContainer: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     eyeIcon: {
         position: "absolute",
@@ -273,20 +273,17 @@ const styles = StyleSheet.create({
     },
     signUpText: {
         color: "#000",
-        fontSize: 20,
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontSize: 22,
+        fontFamily: "TimesNewRoman",
     },
     loginText: {
         color: "#fff",
         fontSize: 16,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         textAlign: "center",
         marginTop: 20
     },
     loginBold: {
-        fontWeight: "bold",
-        fontStyle: "italic",
         color: "#d4af37"
     },
 });

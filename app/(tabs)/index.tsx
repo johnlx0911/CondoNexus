@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as Font from 'expo-font';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Modal } from "react-native";
 import { createStackNavigator, StackNavigationProp } from "@react-navigation/stack";
 import { LinearGradient } from "expo-linear-gradient";
@@ -49,7 +50,7 @@ export type RootStackParamList = {
   EditMember: { member: { name: string; email: string; mobile: string } };
   Payment: undefined;
   Transaction: undefined;
-  TransactionDetails: { transaction: { month: string; amount: number; date: string } };
+  TransactionDetails: { transaction: { month: string; amount: number; date_paid: string } };
   CheckOut: undefined;
   Facility: undefined;
   Booking: { facility: string };
@@ -89,6 +90,38 @@ function LoginScreen({ navigation }: { navigation: StackNavigationProp<RootStack
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'TimesNewRoman': require('../../assets/fonts/TimesNewRoman.ttf'),
+    }).then(() => {
+      setFontsLoaded(true);
+
+      // ✅ GLOBAL DEFAULT FONT OVERRIDE FOR <Text>
+      const TextAny = Text as any;
+      const oldTextRender = TextAny.render;
+      TextAny.render = function (...args: any[]) {
+        const origin = oldTextRender.call(this, ...args);
+        if (!origin) return null;
+        return React.cloneElement(origin, {
+          style: [{ fontFamily: 'TimesNewRoman' }, origin.props.style],
+        });
+      };
+
+      // ✅ GLOBAL DEFAULT FONT FOR <TextInput>
+      const TextInputAny = TextInput as any;
+      const oldInputRender = TextInputAny.render;
+      TextInputAny.render = function (...args: any[]) {
+        const origin = oldInputRender.call(this, ...args);
+        if (!origin) return null;
+        return React.cloneElement(origin, {
+          style: [{ fontFamily: 'TimesNewRoman' }, origin.props.style],
+        });
+      };
+    });
+  }, []);
 
   // ✅ Handle Forgot Password using SendGrid
   const handleForgotPassword = async () => {
@@ -400,9 +433,8 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     color: "#d4af37",
-    fontWeight: "bold",
     marginTop: 10,
   },
   inputContainer: {
@@ -414,7 +446,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 5,
     marginTop: 10,
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   input: {
     flex: 1,
@@ -424,7 +456,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     fontSize: 18,
     color: "#fff",
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   passwordContainer: {
     flexDirection: "row",
@@ -440,7 +472,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     width: "100%",
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   eyeIcon: {
     position: "absolute",
@@ -457,13 +489,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     marginLeft: 8,
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   forgotPassword: {
     color: "#d4af37",
     fontSize: 16,
     marginLeft: "auto",
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   forgotPasswordContainer: {
     flex: 1,
@@ -481,22 +513,19 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: "#000",
-    fontSize: 20,
-    fontWeight: "bold",
-    fontFamily: "Times New Roman",
+    fontSize: 22,
+    fontFamily: "TimesNewRoman",
   },
   signupText: {
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
     marginTop: 20,
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
   signupBold: {
-    fontWeight: "bold",
-    fontStyle: "italic",
     color: "#d4af37",
-    fontFamily: "Times New Roman",
+    fontFamily: "TimesNewRoman",
   },
 
   // ✅ Modal Styles
@@ -514,8 +543,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
     marginBottom: 10,
   },
   modalText: {

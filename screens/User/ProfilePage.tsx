@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     },
     logoutText: {
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000", // Dark red to indicate logout
     },
     backButton: {
@@ -116,11 +116,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -159,7 +158,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 18,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     bottomNav: {
@@ -183,9 +182,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

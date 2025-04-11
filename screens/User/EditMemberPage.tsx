@@ -111,11 +111,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -149,7 +148,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         color: "#A0A0A0", // ✅ Gray color for labels
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 5,
     },
     input: {
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 20,
     },
     inviteButton: {
@@ -175,9 +174,8 @@ const styles = StyleSheet.create({
     },
     inviteText: {
         color: "#000",
-        fontSize: 18,
-        fontWeight: "bold",
-        fontFamily: "Times New Roman",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
     },
     bottomNav: {
         position: "absolute",
@@ -200,9 +198,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

@@ -455,10 +455,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     confirmButtonText: {
-        fontSize: 20,
-        fontWeight: "bold",
+        fontSize: 22,
         color: "#000",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     backButton: {
         position: "absolute",
@@ -468,11 +467,10 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -495,22 +493,20 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     facilityName: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#fff",
         marginTop: 10,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     detailsContainer: {
         marginTop: 20,
         width: "85%",
     },
     label: {
-        fontSize: 18,
-        fontWeight: "bold",
+        fontSize: 20,
         color: "#d4af37",
         marginBottom: 5,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     inputField: {
         backgroundColor: "rgba(255,255,255,0.1)",
@@ -523,7 +519,7 @@ const styles = StyleSheet.create({
     inputText: {
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     timeContainer: {
         flexDirection: "row",
@@ -545,7 +541,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: "#fff",
         marginHorizontal: 10,
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     buttonWrapper: {
         width: "85%", // ✅ Ensures the entire button is clickable
@@ -582,9 +578,8 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
     },
     buttonText: {
-        fontSize: 18,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 20,
+        fontFamily: "TimesNewRoman",
         color: "#000",
     },
     bottomNav: {
@@ -604,9 +599,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 

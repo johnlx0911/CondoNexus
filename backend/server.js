@@ -14,6 +14,7 @@ const app = express();
 const authRoutes = require("./authRoutes");
 const messageRoutes = require('./messageRoutes');
 const bookingRoutes = require('./bookingRoutes');
+const transactionRoutes = require('./transactionRoutes');
 const generateAvailabilityRoutes = require('./generateAvailability');
 
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use("/api", authRoutes);
 app.use('/api', messageRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/availability', generateAvailabilityRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // 📌 Schedule task to run every midnight
 cron.schedule('0 0 * * *', async () => {
@@ -68,30 +70,6 @@ const verifyToken = (req, res, next) => {
         res.status(400).json({ message: "Invalid Token." });
     }
 };
-
-// 📌 Stripe Integration
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-app.post('/create-payment-intent', async (req, res) => {
-    const { amount, currency } = req.body;
-
-    if (!amount || isNaN(amount)) {
-        return res.status(400).json({ error: "Invalid amount provided" });
-    }
-
-    try {
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: parseInt(amount) * 100,  // Amount in cents
-            currency: currency || 'myr',
-            payment_method_types: ['card'],
-        });
-
-        res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (error) {
-        console.error('Error creating payment intent:', error);
-        res.status(500).json({ error: "Payment intent creation failed. Please try again." });
-    }
-});
 
 // 📌 Signup Route
 app.post("/signup", async (req, res) => {

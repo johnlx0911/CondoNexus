@@ -80,11 +80,10 @@ const styles = StyleSheet.create({
         zIndex: 10, // ✅ Ensures it's above everything
     },
     title: {
-        fontSize: 24,
-        fontWeight: "bold",
+        fontSize: 26,
         color: "#d4af37",
         textAlign: "center",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 10,
         marginTop: 30,
     },
@@ -119,30 +118,28 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     senderName: {
-        fontSize: 30,
-        fontWeight: "bold",
+        fontSize: 32,
         color: "#d4af37",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     timestamp: {
         fontSize: 15,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     recipient: {
         fontSize: 15,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     messageContainer: {
         width: "85%",
         marginBottom: 20,
     },
     messageTitle: {
-        fontSize: 30,
-        fontWeight: "bold",
+        fontSize: 32,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
         marginBottom: 5,
     },
     messageLine: {
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
     messageBody: {
         fontSize: 18,
         color: "#fff",
-        fontFamily: "Times New Roman",
+        fontFamily: "TimesNewRoman",
     },
     bottomNav: {
         position: "absolute",
@@ -179,9 +176,8 @@ const styles = StyleSheet.create({
     },
     navText: {
         color: "#000",
-        fontSize: 16,
-        fontFamily: "Times New Roman",
-        fontWeight: "bold",
+        fontSize: 18,
+        fontFamily: "TimesNewRoman",
     },
 });
 
