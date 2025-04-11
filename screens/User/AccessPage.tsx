@@ -5,69 +5,9 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 import Icon from "react-native-vector-icons/Feather";
-// import NfcManager, { NfcTech } from 'react-native-nfc-manager';
-// import { BleManager } from 'react-native-ble-plx';
-
-// Initialize NFC
-// NfcManager.start();
 
 const AccessPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-    // const bleManager = new BleManager();
-
-    const DEVICE_NAME = "ESP32_NFC_Reader";  // Match your ESP32's Bluetooth name
-    const SERVICE_UUID = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"; // Replace with actual UUID
-    const CHARACTERISTIC_UUID = "YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY"; // Replace with actual UUID
-
-    // const sendBluetoothSignal = async () => {
-    //     const devices = await bleManager.devices([]);
-    //     const targetDevice = devices.find(device => device.name === DEVICE_NAME);
-
-    //     if (targetDevice) {
-    //         await targetDevice.connect();
-    //         await targetDevice.discoverAllServicesAndCharacteristics();
-    //         await targetDevice.writeCharacteristicWithResponseForService(
-    //             SERVICE_UUID,
-    //             CHARACTERISTIC_UUID,
-    //             Buffer.from("APP_RUNNING").toString('base64')  // Send "APP_RUNNING" to ESP32
-    //         );
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     const detectNfc = async () => {
-    //         try {
-    //             await NfcManager.requestTechnology(NfcTech.Ndef);
-    //             const tag = await NfcManager.getTag();
-
-    //             if (tag) {
-    //                 await sendBluetoothSignal(); // Send Bluetooth signal to confirm app is active
-
-    //                 Alert.alert('🔵 App NFC Detected', JSON.stringify(tag, null, 2));
-    //                 console.log('🔵 App NFC Detected:', tag);
-    //             } else {
-    //                 Alert.alert('🟠 Phone NFC Detected', 'Detected via system NFC reader.');
-    //                 console.log('🟠 Phone NFC Detected:', tag);
-    //             }
-    //         } catch (error) {
-    //             console.warn('NFC read failed', error);
-    //             Alert.alert('❌ No NFC Tag Found');
-    //         } finally {
-    //             NfcManager.cancelTechnologyRequest();
-    //         }
-    //     };
-
-    //     detectNfc();
-
-    //     // Optional: Resend signal periodically to keep connection active
-    //     const interval = setInterval(() => {
-    //         sendBluetoothSignal();
-    //     }, 8000); // Send signal every 8 seconds
-
-    //     return () => {
-    //         clearInterval(interval);  // Clean up interval on unmount
-    //     };
-    // }, []);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
