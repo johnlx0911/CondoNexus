@@ -5,9 +5,34 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
 import Icon from "react-native-vector-icons/Feather";
+import axios from 'axios';
 
 const AccessPage = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+    useEffect(() => {
+        const pingESP32 = async () => {
+            try {
+                const res = await axios.get("http://192.168.0.115/app-ping");
+                console.log("✅ ESP32 Response:", res.data);
+            } catch (error: any) {
+                console.error("❌ Failed to ping ESP32:", error.message);
+                Alert.alert("ESP32 Error", "Could not reach ESP32.");
+            }
+        };
+
+        pingESP32();
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            axios.get("http://192.168.0.115/app-ping")
+                .then(res => console.log("✅ ESP32 Response:", res.data))
+                .catch(err => console.error("❌ ESP32 Error:", err.message));
+        }, 5000); // every 5s
+
+        return () => clearInterval(interval); // cleanup on page exit
+    }, []);
 
     return (
         <LinearGradient colors={["#1a120b", "#b88b4a"]} style={styles.container}>
