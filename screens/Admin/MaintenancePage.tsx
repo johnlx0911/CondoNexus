@@ -68,12 +68,6 @@ const MaintenancePage: React.FC = () => {
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Resident", { residentId: "default" })}>
                     <Text style={styles.navText}>👥  R E S I D E N T S</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityManagement")}>
-                    <Text style={styles.navText}>🏊  F A C I L I T Y  B O O K I N G</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("FacilityStatus")}>
-                    <Text style={styles.navText}>📊  F A C I L I T Y  S T A T U S</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Maintenance")}>
                     <Text style={styles.navText}>🛠  M A I N T E N A N C E</Text>
                 </TouchableOpacity>

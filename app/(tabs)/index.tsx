@@ -29,8 +29,6 @@ import ContactPage from "../../screens/User/ContactPage";
 
 // Admin
 import DashboardPage from "../../screens/Admin/DashboardPage";
-import FacilityManagementPage from "../../screens/Admin/FacilityManagementPage";
-import FacilityStatusPage from "../../screens/Admin/FacilityStatusPage";
 import MaintenancePage from "../../screens/Admin/MaintenancePage";
 import ResidentPage from "../../screens/Admin/ResidentPage";
 import ResidentMessagePage from "../../screens/Admin/ResidentMessagePage";
@@ -61,8 +59,6 @@ export type RootStackParamList = {
 
   // Admin
   Dashboard: undefined;
-  FacilityManagement: undefined;
-  FacilityStatus: undefined;
   Maintenance: undefined;
   ResidentMessage: undefined;
   Resident: { residentId: string };
@@ -390,8 +386,6 @@ export default function AppNavigator() {
 
       {/* Admin */}
       <Stack.Screen name="Dashboard" component={DashboardPage} options={{ headerShown: false }} />
-      <Stack.Screen name="FacilityManagement" component={FacilityManagementPage} options={{ headerShown: false }} />
-      <Stack.Screen name="FacilityStatus" component={FacilityStatusPage} options={{ headerShown: false }} />
       <Stack.Screen name="Maintenance" component={MaintenancePage} options={{ headerShown: false }} />
       <Stack.Screen name="ResidentMessage" component={ResidentMessagePage} options={{ headerShown: false }} />
       <Stack.Screen name="Resident" component={ResidentPage} options={{ headerShown: false }} />
