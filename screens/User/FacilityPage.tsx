@@ -9,19 +9,19 @@ import Icon from "react-native-vector-icons/Feather";
 const { height } = Dimensions.get("window"); // Get device height dynamically
 
 const facilities = [
-    { id: 1, name: "BBQ", icon: "zap" },
-    { id: 2, name: "Sauna", icon: "sun" },
-    { id: 3, name: "Ping Pong", icon: "disc" },
-    { id: 4, name: "Gym", icon: "activity" },
-    { id: 5, name: "Swimming", icon: "droplet" },
-    { id: 6, name: "Movie", icon: "film" },
-    { id: 7, name: "Basketball", icon: "circle" },
-    { id: 8, name: "Badminton", icon: "wind" },
-    { id: 9, name: "Tennis", icon: "target" },
-    { id: 10, name: "Library", icon: "book" },
-    { id: 11, name: "Cafe", icon: "coffee" },
-    { id: 12, name: "Co-Working", icon: "briefcase" },
-    { id: 13, name: "Karaoke", icon: "music" },
+    { id: 1, name: "BBQ", icon: "zap", description: "Located at rooftop, perfect for family grilling." },
+    { id: 2, name: "Sauna", icon: "sun", description: "Next to the gym, open for relaxation and healthy." },
+    { id: 3, name: "Ping Pong", icon: "disc", description: "Basement floor, great for friendly matches." },
+    { id: 4, name: "Gym", icon: "activity", description: "Beside lobby, includes cardio and weights." },
+    { id: 5, name: "Swimming", icon: "droplet", description: "Infinity pool on Level 3, Please wear swim suit." },
+    { id: 6, name: "Movie", icon: "film", description: "Private screening room, prepare your own bites and head to Level 2." },
+    { id: 7, name: "Basketball", icon: "circle", description: "Outdoor court, open for all ages, located at open area." },
+    { id: 8, name: "Badminton", icon: "wind", description: "Indoor court, reserve at least 1 day ahead." },
+    { id: 9, name: "Tennis", icon: "target", description: "Available all day, including evening with lighting." },
+    { id: 10, name: "Library", icon: "book", description: "Quiet reading room, please lower your voice, Level 5." },
+    { id: 11, name: "Cafe", icon: "coffee", description: "Ground floor, great drinks and light bites." },
+    { id: 12, name: "Co-Working", icon: "briefcase", description: "Work pods and fast Wi-Fi, Level 4." },
+    { id: 13, name: "Karaoke", icon: "music", description: "Sing your heart out, enjoy the music, basement level." },
 ];
 
 const FacilityPage = () => {

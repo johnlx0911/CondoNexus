@@ -185,6 +185,10 @@ const BookingPage = () => {
                     <Text style={styles.facilityName}>{facility.name}</Text>
                 </View>
 
+                {facility.description && (
+                    <Text style={styles.facilityDescription}>{facility.description}</Text>
+                )}
+
                 {/* Booking Details */}
                 <View style={styles.detailsContainer}>
                     {/* Booking Date */}
@@ -619,6 +623,13 @@ const styles = StyleSheet.create({
     navText: {
         color: "#000",
         fontSize: 18,
+        fontFamily: "TimesNewRoman",
+    },
+    facilityDescription: {
+        color: "#fff",
+        fontSize: 16,
+        textAlign: "center",
+        marginTop: 10,
         fontFamily: "TimesNewRoman",
     },
 });
