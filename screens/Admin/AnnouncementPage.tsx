@@ -1,33 +1,34 @@
-import React, { useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Animated,
-    FlatList,
-    TextInput,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Animated, FlatList, TextInput } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../App";
-
-// Sample announcements data
-const initialAnnouncements = [
-    { id: "1", title: "Pool Maintenance", message: "The swimming pool will be closed for cleaning on Saturday.", date: "2025-02-28" },
-    { id: "2", title: "Security Update", message: "Please remember to update your visitor access list.", date: "2025-02-25" },
-    { id: "3", title: "Event: Community BBQ", message: "Join us for a BBQ this weekend at the common area!", date: "2025-03-02" },
-];
+import axios from "axios";
 
 const AnnouncementPage: React.FC = () => {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const slideAnim = useState(new Animated.Value(-250))[0];
-    const [announcements, setAnnouncements] = useState(initialAnnouncements);
+    const [announcements, setAnnouncements] = useState<any[]>([]);
     const [newTitle, setNewTitle] = useState("");
     const [newMessage, setNewMessage] = useState("");
+
+    const API_BASE = "http://192.168.0.109:5000/api";
+
+    // Fetch announcements from backend
+    const fetchAnnouncements = async () => {
+        try {
+            const res = await axios.get(`${API_BASE}/get-announcements`);
+            setAnnouncements(res.data);
+        } catch (err) {
+            console.error("❌ Failed to fetch announcements:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchAnnouncements();
+    }, []);
 
     // Toggle Sidebar
     const toggleSidebar = () => {
@@ -39,24 +40,39 @@ const AnnouncementPage: React.FC = () => {
         setSidebarOpen(!sidebarOpen);
     };
 
-    // Function to add a new announcement
-    const addAnnouncement = () => {
+    // Add new announcement
+    const addAnnouncement = async () => {
         if (newTitle.trim() && newMessage.trim()) {
-            const newAnnouncement = {
-                id: Math.random().toString(),
-                title: newTitle,
-                message: newMessage,
-                date: new Date().toISOString().split("T")[0],
+            const payload = {
+                recipient: "all",
+                sender: "leexing0911@gmail.com",
+                subject: newTitle.trim(),
+                message: newMessage.trim(),
+                type: "announcement",
+                timestamp: new Date().toISOString(),
             };
-            setAnnouncements([newAnnouncement, ...announcements]);
-            setNewTitle("");
-            setNewMessage("");
+
+            try {
+                await axios.post(`${API_BASE}/send-message`, payload);
+                console.log("📢 Announcement sent!");
+                setNewTitle("");
+                setNewMessage("");
+                fetchAnnouncements(); // Refresh list
+            } catch (err: any) {
+                console.error("❌ Failed to send announcement:", err.response?.data || err.message);
+            }
         }
     };
 
-    // Function to delete an announcement
-    const deleteAnnouncement = (id: string) => {
-        setAnnouncements(announcements.filter((item) => item.id !== id));
+    // Local delete (soft delete from UI)
+    const deleteAnnouncement = async (id: number) => {
+        try {
+            await axios.delete(`${API_BASE}/delete-announcement/${id}`);
+            setAnnouncements(prev => prev.filter(item => item.id !== id));
+            console.log("🗑️ Deleted announcement ID:", id);
+        } catch (err) {
+            console.error("❌ Failed to delete announcement:", err);
+        }
     };
 
     return (

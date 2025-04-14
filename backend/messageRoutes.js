@@ -39,6 +39,37 @@ router.get('/get-resident-messages', (req, res) => {
     });
 });
 
+router.get('/get-announcements', (req, res) => {
+    const sql = `SELECT id, subject AS title, message, createdAt AS date FROM messages WHERE type = 'announcement' ORDER BY createdAt DESC`;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("❌ Failed to fetch announcements:", err);
+            return res.status(500).json({ success: false, message: "Failed to fetch announcements." });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// ✅ DELETE - Permanently delete an announcement by ID
+router.delete('/delete-announcement/:id', (req, res) => {
+    const { id } = req.params;
+
+    const sql = `DELETE FROM messages WHERE id = ? AND type = 'announcement'`;
+    db.query(sql, [id], (err, result) => {
+        if (err) {
+            console.error("❌ Failed to delete announcement:", err);
+            return res.status(500).json({ success: false, message: "Failed to delete announcement." });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Announcement not found." });
+        }
+
+        return res.status(200).json({ success: true, message: "Announcement deleted successfully." });
+    });
+});
+
 // ✅ POST - Send Message
 router.post('/send-message', async (req, res) => {
     const { recipient, sender, subject, message, timestamp, type, messageId } = req.body;
@@ -51,10 +82,34 @@ router.post('/send-message', async (req, res) => {
         return res.status(400).json({ success: false, message: "All fields are required." });
     }
 
-    // 🔍 Ensure `type` is only 'user' or 'admin'
-    if (type !== 'user' && type !== 'admin') {
+    // 🔍 Ensure `type` is one of the accepted values
+    if (!['user', 'admin', 'announcement'].includes(type)) {
         console.log("❌ Invalid 'type' value:", type);
         return res.status(400).json({ success: false, message: "Invalid 'type' value." });
+    }
+
+    // ✅ Broadcast announcement to all approved users
+    if (type === 'announcement' && recipient === 'all') {
+        const getUsersSql = `SELECT email FROM users WHERE status = 'Approved'`;
+        db.query(getUsersSql, (err, users) => {
+            if (err) {
+                console.error("❌ Failed to fetch users:", err);
+                return res.status(500).json({ success: false, message: "Failed to retrieve users." });
+            }
+
+            const insertSql = `INSERT INTO messages (recipient, sender, subject, message, status, type) VALUES ?`;
+            const values = users.map(user => [user.email, sender, subject, message, 'Unread', 'announcement']);
+
+            db.query(insertSql, [values], (insertErr) => {
+                if (insertErr) {
+                    console.error("❌ Insert error for announcement:", insertErr);
+                    return res.status(500).json({ success: false, message: "Failed to send announcement." });
+                }
+
+                return res.status(201).json({ success: true, message: "Announcement sent to all users!" });
+            });
+        });
+        return;
     }
 
     // ✅ Only check for `messageId` if it's a reply

@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     inviteButton: {
-        marginTop: 45, // ✅ Adjusted for spacing
+        marginTop: -20, // ✅ Adjusted for spacing
         alignSelf: "center",
         width: "85%",
     },

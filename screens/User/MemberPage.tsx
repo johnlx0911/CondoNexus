@@ -86,12 +86,15 @@ const MemberPage = () => {
                 visible={inviteModalVisible}
                 animationType="fade"
                 onRequestClose={() => setInviteModalVisible(false)}
+                statusBarTranslucent={true}
             >
-                <TouchableOpacity
-                    style={styles.modalContainer}
-                    activeOpacity={1}
-                    onPressOut={() => setInviteModalVisible(false)} // 🔥 Tapping outside closes modal
-                >
+                <View style={styles.modalContainer}>
+                    {/* Background dismiss layer */}
+                    <TouchableWithoutFeedback onPress={() => setInviteModalVisible(false)}>
+                        <View style={styles.modalBackground} />
+                    </TouchableWithoutFeedback>
+
+                    {/* Modal content */}
                     <View style={styles.modalContentWrapper}>
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContent}>
@@ -144,7 +147,7 @@ const MemberPage = () => {
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
-                </TouchableOpacity>
+                </View>
             </Modal>
 
             {/* Bottom Navigation */}
@@ -333,7 +336,15 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-    }
+    },
+    modalBackground: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        height: "100%",
+        width: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    }    
 });
 
 export default MemberPage;
