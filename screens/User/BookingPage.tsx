@@ -250,6 +250,14 @@ const BookingPage = () => {
                             />
                             <TouchableOpacity
                                 onPress={() => {
+                                    const now = new Date();
+                                    if (isToday(bookingDate) && tempStartTime &&
+                                        (tempStartTime.getHours() < now.getHours() || (tempStartTime.getHours() === now.getHours() && tempStartTime.getMinutes() <= now.getMinutes()))
+                                    ) {
+                                        Alert.alert("Invalid Time", "Cannot select a past start time.");
+                                        return;
+                                    }
+
                                     if (tempStartTime && endTime && !validateTimeRange(tempStartTime, endTime)) {
                                         Alert.alert(
                                             "Invalid Start Time",
@@ -258,8 +266,7 @@ const BookingPage = () => {
                                     } else if (tempStartTime && isSlotFull(tempStartTime)) {
                                         Alert.alert("Fully Booked", "This time slot is fully booked. Please choose another one.");
                                         return;
-                                    }
-                                    else {
+                                    } else {
                                         setStartTime(tempStartTime);
                                         setShowStartPicker(false);
                                     }
@@ -285,6 +292,19 @@ const BookingPage = () => {
                             />
                             <TouchableOpacity
                                 onPress={() => {
+                                    const now = new Date();
+                                    if (
+                                        isToday(bookingDate) &&
+                                        tempEndTime &&
+                                        (
+                                            tempEndTime.getHours() < now.getHours() ||
+                                            (tempEndTime.getHours() === now.getHours() && tempEndTime.getMinutes() <= now.getMinutes())
+                                        )
+                                    ) {
+                                        Alert.alert("Invalid Time", "Cannot select a past end time.");
+                                        return;
+                                    }
+
                                     if (tempEndTime && startTime && !validateTimeRange(startTime, tempEndTime)) {
                                         Alert.alert(
                                             "Invalid End Time",
@@ -293,8 +313,7 @@ const BookingPage = () => {
                                     } else if (tempEndTime && isSlotFull(tempEndTime)) {
                                         Alert.alert("Fully Booked", "This time slot is fully booked. Please choose another one.");
                                         return;
-                                    }
-                                    else {
+                                    } else {
                                         setEndTime(tempEndTime);
                                         setShowEndPicker(false);
                                     }
